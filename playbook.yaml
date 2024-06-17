@@ -35,6 +35,22 @@
       become: true
       become_user: odroid
 
+    - name: Git personal setup name
+      git_config:
+        name: user.name
+        scope: global
+        value: "tomasort"
+      become: true
+      become_user: odroid
+
+    - name: Set Git color UI to auto for odroid user
+      community.general.git_config:
+        name: color.ui
+        scope: global
+        value: auto
+      become: true
+      become_user: odroid
+
     - name: Check if Zsh is default shell
       shell: echo $SHELL
       register: current_shell
@@ -192,3 +208,17 @@
           - docker-buildx-plugin
           - docker-compose-plugin
         state: present 
+
+    - name: Install alsa-utils
+      apt:
+        name: alsa-utils
+        state: present
+
+    - name: Install FFmpeg
+      apt:
+        name: ffmpeg
+        state: present
+
+    - name: Reboot a slow machine that might have lots of updates to apply
+      reboot:
+        reboot_timeout: 3600 
