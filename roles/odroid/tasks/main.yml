@@ -1,0 +1,11 @@
+---
+# tasks file for odroid
+- na- name: Upgrade packages
+  ansible.builtin.apt:
+    update_cache: yes
+    upgrade: yes
+
+- name: Distribution upgrade (potentially more disruptive)
+  ansible.builtin.apt:
+    update_cache: yes
+    upgrade: dist

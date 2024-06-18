@@ -1,0 +1,49 @@
+# Zsh configuration
+- name: Check if Zsh is default shell
+  shell: echo $SHELL
+  register: current_shell
+
+- name: Change shell to zsh
+  shell: chsh -s $(which zsh) "{{ user }}"
+  args:
+    executable: /bin/bash
+  become: true
+
+# Oh-my-zsh installation
+- name: Install oh-my-zsh
+  get_url:
+    url: https://raw.github.com/robbyrussell/oh-my-zsh/master/tools/install.sh
+    dest: /tmp/install_oh_my_zsh.sh
+    mode: '0755'
+  become: true
+
+- name: Run oh-my-zsh installation script
+  shell: sh /tmp/install_oh_my_zsh.sh --unattended
+  args:
+    creates: "{{ home }}/.oh-my-zsh"
+
+- name: Ensure .oh-my-zsh custom plugins directory exists
+  ansible.builtin.file:
+    path: "{{ home }}/.oh-my-zsh/custom/plugins"
+    state: directory
+    owner: "{{ user }}"
+
+# Zsh plugins
+- name: Install zsh-autosuggestions
+  ansible.builtin.git:
+    repo: 'https://github.com/zsh-users/zsh-autosuggestions.git'
+    dest: "{{ home }}/.oh-my-zsh/custom/plugins/zsh-autosuggestions"
+
+- name: Install zsh-syntax-highlighting
+  ansible.builtin.git:
+    repo: 'https://github.com/zsh-users/zsh-syntax-highlighting.git'
+    dest: "{{ ansible_env.HOME }}/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting"
+
+# TODO: add zsh-history-substring-search
+
+# TODO: change it so that the file .zshrc is copied from the files directory
+- name: Create .zshrc
+  shell: |
+    echo "export ZSH=\"$HOME/.oh-my-zsh\"
+    ZSH_THEME=\"robbyrussell\"
+    bindkey '^@' autosuggest-accept" >> "{{ zshrc_path }}"

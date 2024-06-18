@@ -1,0 +1,39 @@
+---
+# tasks file for common
+- name: Install common packages
+  package:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - zsh
+    - git
+    - vim
+    - curl
+    - htop
+    - tmux
+    - fzf
+  become: true
+  tags:
+    - packages
+
+- name: Include zsh tasks 
+  include_tasks: "zsh.yml"
+  tags:
+    - zsh 
+
+- name: Include git tasks 
+  include_tasks: "git.yml"
+  tags:
+    - git 
+
+- name: Include python tasks
+  include_tasks: "python.yml"
+  tags:
+    - python
+
+- name: Include ssh tasks
+  include_tasks: "ssh.yml"
+  tags:
+    - ssh
+
+

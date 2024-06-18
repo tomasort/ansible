@@ -1,0 +1,21 @@
+  # Python3 installation
+- name: Ensure Python 3 is installed.
+  package:
+    name: python3
+    state: present
+
+  # Pip installation
+- name: Ensure Pip is installed.
+  package:
+    name: "{{ pip_package }}"
+    state: present
+
+- name: Ensure pip_install_packages are installed.
+  ansible.builtin.pip:
+    name: "{{ item.name | default(item) }}"
+    version: "{{ item.version | default(omit) }}"
+    virtualenv: "{{ item.virtualenv | default(omit) }}"
+    state: "{{ item.state | default(omit) }}"
+    extra_args: "{{ item.extra_args | default(omit) }}"
+    executable: "{{ item.virtualenv | default(false) | ternary(omit, pip_executable) }}"
+  loop: "{{ pip_install_packages }}"
