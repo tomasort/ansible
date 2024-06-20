@@ -1,0 +1,12 @@
+# vim configuration
+- name: Ensure vim is installed.
+  package:
+    name: vim 
+    state: present
+  become: true
+
+- name: Create .vimrc
+  copy:
+    src: .vimrc
+    dest: "{{ [home, '.vimrc'] | path_join }}"
+    mode: 0644

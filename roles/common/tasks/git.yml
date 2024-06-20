@@ -1,15 +1,21 @@
 # Git configuration
+- name: Ensure git is installed.
+  package:
+    name: git 
+    state: present
+  become: true
+
 - name: Git personal setup email
-  git_config:
+  community.general.git_config:
     name: user.email
     scope: global
-    value: {{ email }}
+    value: "{{ email }}"
 
 - name: Git personal setup name
-  git_config:
+  community.general.git_config:
     name: user.name
     scope: global
-    value: {{ git_name }}
+    value: "{{ git_name }}"
 
 - name: Set Git color UI to auto
   community.general.git_config:

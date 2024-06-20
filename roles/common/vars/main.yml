@@ -2,20 +2,26 @@
 # vars file for common
 home: "{{ lookup('env', 'HOME') }}"
 user: "{{ lookup('env', 'USER') }}"
-email: "tomasvortegar@gmail.com"
+email: "tomasort@gmail.com"
 git_name: "tomasort"
 key: ".ssh/id_ed25519"
 
 # For Python 3, use python3-pip.
 pip_package: python3-pip
+jjj
 pip_executable: "{{ 'pip3' if pip_package.startswith('python3') else 'pip' }}"
+pip_install_packages: []
 
-pip_install_packages:
+pipx_executable: pipx
+pipx_install_packages:
   - name: matplotlib
   - name: numpy 
   - name: pandas
   - name: jupyter
-  - name: beautifulsoup4
   - name: requests
-  - name: lxml
-  - name: scrapy
+  - name: scipy
+  - name: scikit-learn
+  - name: sympy
+  - name: nose
+  - name: pytest
+  - name: you-get

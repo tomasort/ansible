@@ -1,2 +1,3 @@
 ---
 # vars file for odroid
+var: var_odroid

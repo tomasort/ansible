@@ -3,14 +3,16 @@
   package:
     name: python3
     state: present
+  become: true
 
   # Pip installation
 - name: Ensure Pip is installed.
   package:
     name: "{{ pip_package }}"
     state: present
+  tags: [ pip ]
 
-- name: Ensure pip_install_packages are installed.
+- name: Ensure pip packages are installed.
   ansible.builtin.pip:
     name: "{{ item.name | default(item) }}"
     version: "{{ item.version | default(omit) }}"
@@ -19,3 +21,25 @@
     extra_args: "{{ item.extra_args | default(omit) }}"
     executable: "{{ item.virtualenv | default(false) | ternary(omit, pip_executable) }}"
   loop: "{{ pip_install_packages }}"
+  tags: [ pip, packages ]
+
+- name: Ensure Pipx is installed.
+  package:
+    name: "pipx"
+    state: present
+  tags: [ pip, pipx ]
+
+- name: Ensure pipx packages are installed.
+  ansible.builtin.pip:
+    name: "{{ item.name | default(item) }}"
+    version: "{{ item.version | default(omit) }}"
+    state: "{{ item.state | default(omit) }}"
+    extra_args: "{{ item.extra_args | default('--include-deps') }}"
+    executable: "{{ item.virtualenv | default(false) | ternary(omit, pipx_executable) }}"
+  loop: "{{ pipx_install_packages }}"
+  tags: [ pip, packages, pipx ]
+
+- name: Ensure path is set for pipx.
+  ansible.builtin.command:
+    cmd: "{{ pipx_executable }} ensurepath"
+  tags: [ pip, pipx ]

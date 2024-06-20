@@ -1,0 +1,6 @@
+- hosts: localhost 
+  tags: pi 
+  roles:
+    - common
+    - geerlingguy.docker
+    - raspberrypi

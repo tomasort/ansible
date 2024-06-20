@@ -1,4 +1,33 @@
 #!/bin/bash
-sudo apt install software-properties-common
-sudo apt-add-repository --yes --update ppa:ansible/ansible
-sudo apt install ansible
+# Function to show usage
+usage() {
+  echo "Usage: $0 [-a]"
+  echo "  -a  Install Ansible and requirements only"
+  exit 1
+}
+
+# Function to install requirements
+install_requirements() {
+  ansible-galaxy install -r requirements.yml --force
+}
+
+# Parse command line arguments
+while getopts ":r" option; do
+  case "${option}" in
+    r)
+      install_requirements
+      exit 0
+      ;;
+    *)
+      usage
+      ;;
+  esac
+done
+
+# If no arguments are provided, run all commands
+if [ ${OPTIND} -eq 1 ]; then
+  sudo apt install -y software-properties-common
+  sudo apt-add-repository --yes --update ppa:ansible/ansible
+  sudo apt install -y ansible
+  install_requirements
+fi

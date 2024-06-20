@@ -1,11 +1,39 @@
 ---
 # tasks file for odroid
-- na- name: Upgrade packages
+- name: Upgrade packages
   ansible.builtin.apt:
     update_cache: yes
     upgrade: yes
+  become: true
+  when: package_upgrade == true
+  tags: [ packages, updates ]
 
-- name: Distribution upgrade (potentially more disruptive)
+- debug:
+    msg: "Upgrade distribution? {{ dist_update }}"
+
+- name: Distribution upgrade
   ansible.builtin.apt:
     update_cache: yes
     upgrade: dist
+  become: true
+  when: dist_update == true
+  tags: [ packages, updates ]
+
+- name: Install packages specific to Odroid SBCs
+  package:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - device-tree-compiler
+    - v4l-utils
+    - build-essential
+    - dkms
+    - network-manager
+    - ufw
+    - fail2ban
+  become: true
+  tags: [ packages ]
+
+- name: Include network configuration tasks 
+  import_tasks: "network_config.yml"
+  tags: [ network ] 

@@ -1,25 +1,24 @@
 - name: Ensure .ssh directory exists.
   file:
-    dest: "{{ home, '.ssh' | path_join }}"
-    mode: 0700
+    dest: "{{ [home, '.ssh'] | path_join }}"
+    mode: 0775
     state: directory
 
 - name: Install ssh key
   copy:
-    src: "{{ role_path, 'files', key | path_join }}"
-    dest: "{{ home, key | path_join }}"
+    src: "{{ key }}"
+    dest: "{{ [home, key] | path_join }}"
     mode: 0600
 
 - name: Install ssh key public
   copy:
-    src: "{{ role_path, 'files', key | path_join }}.pub"
-    dest: "{{ home, key | path_join }}.pub"
+    src: "{{ key }}.pub"
+    dest: "{{ [home, key] | path_join }}.pub"
     mode: 0644
 
 - name: Set authorized key took from file
   authorized_key:
     user: "{{ user }}"
     state: present
-    key: "{{ home, key | path_join }}.pub"
-  with_fileglob:
-  - "{{ home }}/.ssh/*.pub"
+    key: "{{ lookup('file', [home, key + '.pub'] | path_join) }}"
+  with_fileglob: "{{ home }}/.ssh/*.pub"

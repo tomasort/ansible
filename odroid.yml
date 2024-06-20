@@ -1,0 +1,18 @@
+- hosts: localhost 
+  tags: odroid
+  vars: 
+    dist_update: false
+    package_upgrade: false
+  roles:
+    - common
+    - role: geerlingguy.docker
+      become: true
+      vars:
+        docker_users:
+          - "{{ lookup('env', 'USER') }}"
+          - root
+        docker_install_compose: true
+      tags: [ docker ]
+    - role: odroid
+      tags: debug
+    - ubuntu

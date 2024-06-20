@@ -1,0 +1,6 @@
+---
+# tasks file for ubuntu
+- name: Install alsa-utils
+  apt:
+    name: alsa-utils
+    state: present

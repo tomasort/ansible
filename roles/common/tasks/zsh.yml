@@ -1,13 +1,24 @@
 # Zsh configuration
-- name: Check if Zsh is default shell
-  shell: echo $SHELL
-  register: current_shell
+- name: Ensure zsh is installed.
+  package:
+    name: zsh 
+    state: present
+  become: true
+
+- name: Check current shell
+  command: echo $SHELL
+  register: shell
+  changed_when: false
 
 - name: Change shell to zsh
   shell: chsh -s $(which zsh) "{{ user }}"
   args:
     executable: /bin/bash
   become: true
+  when: "'zsh' not in shell.stdout" 
+
+- debug:
+    msg: "Using shell {{ lookup('env', 'SHELL') }}"
 
 # Oh-my-zsh installation
 - name: Install oh-my-zsh
@@ -37,13 +48,29 @@
 - name: Install zsh-syntax-highlighting
   ansible.builtin.git:
     repo: 'https://github.com/zsh-users/zsh-syntax-highlighting.git'
-    dest: "{{ ansible_env.HOME }}/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting"
+    dest: "{{ home }}/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting"
 
-# TODO: add zsh-history-substring-search
+- name: Install zsh-history-substring-search
+  ansible.builtin.git:
+    repo: 'https://github.com/zsh-users/zsh-history-substring-search.git'
+    dest: "{{ home }}/.oh-my-zsh/custom/plugins/zsh-history-substring-search"
 
-# TODO: change it so that the file .zshrc is copied from the files directory
-- name: Create .zshrc
-  shell: |
-    echo "export ZSH=\"$HOME/.oh-my-zsh\"
-    ZSH_THEME=\"robbyrussell\"
-    bindkey '^@' autosuggest-accept" >> "{{ zshrc_path }}"
+- debug: 
+    msg: "Using the zsh theme {{ zsh_theme }}"
+
+- name: Create .zshr 
+  ansible.builtin.template:
+    src: templates/.zshrc.j2
+    dest: "{{ [home, '.zshrc'] | path_join }}"
+    mode: 0644
+  vars: 
+    zsh_plugins: "web-search vi-mode zsh-autosuggestions zsh-syntax-highlighting zsh-history-substring-search"
+
+- name: Read contents matching regex from ~/.zshrc
+  ansible.builtin.command:
+    cmd: grep -E '^(plugins=|source)' "{{ home }}/.zshrc"
+  register: grep_result
+  changed_when: false
+
+- debug:
+    msg: "The pluings being used in .zshrc are {{ grep_result.stdout_lines }} "

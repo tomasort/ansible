@@ -1,0 +1,103 @@
+# TODO: figure out how to install only the necessary apps and then install the rest later. We will need to eighter run the role twice with different variables or simply create other tasks for installing the apps with homebrew, since it is isntalled with the role. 
+- hosts: macos
+  tags: macos 
+  roles:
+    - macos
+    - common
+    - geerlingguy.certbot
+    - role: geerlingguy.mac.homebrew
+      vars:
+        mas_installed_app_ids:
+          - 497799835 # Xcode
+        homebrew_installed_packages:
+          - ssh-copy-id
+          - ipython
+          - jupyterlab
+          - geckodriver
+          - tree
+          - coreutils
+          - midnight-commander
+          - readline
+          - watch
+          - hub
+          - sdl
+          - jenv
+          - trash
+          - postgis
+          - postgresql
+          - mackup
+        homebrew_cask_apps:
+          - chromedriver
+          - wireshark
+          - putty
+          - virtualbox
+          - docker
+          - google-chrome
+          - visual-studio-code
+          - balenaetcher
+          - vlc
+          - lulu
+          - rapidminer-studio
+          - postman
+          - private-internet-access
+          - slack
+          - weka
+          - timer
+          - countdown
+          - alfred
+          - appgrid
+          - audio-hijack
+          - bonjeff
+          - copyclip
+          - copyq
+          - mactex
+          - basictex
+      tags: [ homebrew ]
+
+  tasks:
+    - name: Install Personal Homebrew packages 
+      import_role:
+        name: geerlingguy.mac.homebrew
+      vars:
+        homebrew_installed_packages:
+          - youtube-dl
+          - imagemagick
+          - graphicsmagick
+          - tor
+          - ripgrep
+          - bower
+          - irssi
+          - httrack
+          - unison
+          - pstree
+          - htop-osx
+          - tcptraceroute
+          - libplist
+          - gource
+          - wakeonlan
+          - polipo
+          - m-cli
+        homebrew_cask_apps:
+          - handbrake
+          - iina
+          - whatsapp
+          - notion
+          - obsidian
+          - autodesk-fusion
+          - arduino-ide
+          - qbittorrent
+          - webtorrent
+          - anki
+          - obs
+          - dolphin 
+          - diffusionbee # stable diffusion locally
+      tags: [ personal, homebrew ]
+    
+    - name: Install Personal Homebrew packages 
+      import_role:
+        name: geerlingguy.mac.mas
+      tags: [ mas ]
+    
+    - name: 
+      import_role:
+        name: geerlingguy.mac.mas

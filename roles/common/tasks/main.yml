@@ -1,6 +1,6 @@
 ---
 # tasks file for common
-- name: Install common packages
+- name: Install minimal packages
   package:
     name: "{{ item }}"
     state: present
@@ -9,31 +9,66 @@
     - git
     - vim
     - curl
-    - htop
-    - tmux
     - fzf
+    - nmap
+    - iftop
   become: true
-  tags:
-    - packages
+  tags: [ packages, minimal ]
+
+- name: Install extra packages
+  package:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - wget
+    - tmux
+    - tree
+    - openvpn
+    - cloc
+    - httrack
+    - pwgen
+    - ffmpeg
+    - hashcat
+  become: true
+  tags: [ packages ]
+
+- name: Install packages not for MacOS
+  package:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - htop # there is a cooler version for macos
+    - handbrake
+  become: true
+  when: ansible_os_family != 'Darwin'
+  tags: [ packages ]
 
 - name: Include zsh tasks 
-  include_tasks: "zsh.yml"
-  tags:
-    - zsh 
+  import_tasks: "zsh.yml"
+  tags: [ zsh, dotfiles, shell, minimal ]
 
 - name: Include git tasks 
-  include_tasks: "git.yml"
-  tags:
-    - git 
+  import_tasks: "git.yml"
+  tags: [ git, minimal ]
+
+- name: Include vim tasks 
+  import_tasks: "vim.yml"
+  tags: [ vim, minimal ]
 
 - name: Include python tasks
-  include_tasks: "python.yml"
-  tags:
-    - python
+  import_tasks: "python.yml"
+  tags: [ python ]
 
 - name: Include ssh tasks
-  include_tasks: "ssh.yml"
-  tags:
-    - ssh
+  import_tasks: "ssh.yml"
+  tags: [ ssh, minimal ]
 
-
+- name: Remove unused packages.
+  package:
+    name:
+      - nano
+      - sendmail
+    state: absent
+    purge: yes
+  become: true
+  tags: [ packages, cleanup, minimal ]
