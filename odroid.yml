@@ -13,6 +13,5 @@
           - root
         docker_install_compose: true
       tags: [ docker ]
-    - role: odroid
-      tags: debug
+    - odroid
     - ubuntu
