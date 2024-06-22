@@ -1,8 +1,8 @@
 #!/bin/bash
 # Function to show usage
 usage() {
-  echo "Usage: $0 [-a]"
-  echo "  -a  Install Ansible and requirements only"
+  echo "Usage: $0 [-r]"
+  echo "  -r  Install Ansible Roles and other requirements"
   exit 1
 }
 

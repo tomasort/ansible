@@ -1,4 +1,4 @@
-# TODO: change the destination to a temp directory
+---
 - name: Clone RTL8812AU driver repository at specific commit
   git:
     repo: 'https://github.com/aircrack-ng/rtl8812au.git'

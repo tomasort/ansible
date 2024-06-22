@@ -1,5 +1,9 @@
 # ansible
 
+This project showcases how I use Ansible to streamline and automate the configuration of my diverse set of personal devices – a macOS laptop, an Ubuntu desktop, and a Raspberry Pi. By leveraging Ansible's infrastructure-as-code approach, I maintain consistent setups, reduce manual errors, and effortlessly provision new systems or roll back changes
+
+---
+
 Use this command for the role you want to use
 
 ```shell

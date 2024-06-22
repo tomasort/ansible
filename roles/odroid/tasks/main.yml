@@ -30,10 +30,13 @@
     - dkms
     - network-manager
     - ufw
-    - fail2ban
   become: true
   tags: [ packages ]
 
 - name: Include network configuration tasks 
-  import_tasks: "network_config.yml"
+  import_tasks: "network.yml"
   tags: [ network ] 
+
+- name: Include gpio configuration tasks 
+  import_tasks: "gpio.yml"
+  tags: [ gpio ] 

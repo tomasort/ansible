@@ -1,2 +1,4 @@
 dist_update: false
 package_upgrade: false
+gpio_ir_pin: 15 # pin used for IR emitter 
+gpiochip: gpiochip0

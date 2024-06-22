@@ -1,0 +1,149 @@
+- name: Check kernel version
+  shell: uname -r | awk -F'-' '{print $1}'
+  register: kernel_version
+  changed_when: false
+- debug:
+    msg: "Kernel version is {{ kernel_version.stdout }}"
+
+- name: Modify DTB tree for IR Blaster
+  block:
+    - name: Install the required packages
+      package:
+        name:
+          - device-tree-compiler
+        state: present
+      become: true
+
+    - name: Find the DTB file
+      ansible.builtin.find:
+        paths: /boot/
+        patterns: "*_odroidn2_plus.dtb"
+        recurse: yes
+        file_type: file
+      register: dtb_directory_info
+      become: true
+    - debug:
+        msg: "- DTB: {{ item.path }}"
+      loop: "{{ dtb_directory_info.files }}"
+
+    - name: Check that there is only one DTB file
+      ansible.builtin.assert:
+        that: dtb_directory_info.matched == 1
+        fail_msg: "There should be only one DTB file"
+        success_msg: "There is only one DTB file"
+
+    # Get the single DTB file path directly
+    - set_fact:
+        dtb_dir: "{{ dtb_directory_info.files[0].path | dirname }}"
+        dtb_file_path: "{{ dtb_directory_info.files[0].path }}"
+        dtb_file_name: "{{ dtb_directory_info.files[0].path | basename }}"
+
+    - name: Debug DTB file information
+      debug:
+        msg: "{{ item.msg }}: {{ item.var }}"
+      loop:
+        - { var: "{{ dtb_dir }}", msg: "Path" }
+        - { var: "{{ dtb_file_name }}", msg: "File name" }
+        - { var: "{{ dtb_file_path }}", msg: "Complete path" }
+
+    - name: Convert DTB to DTS
+      command: "dtc -I dtb -O dts -o /tmp/{{ dtb_file_name.split('.') | first }}.dts {{ dtb_file_path }}"
+      args:
+        creates: "/tmp/{{ dtb_file_name.split('.') | first }}.dts"
+
+    - name: Check if the DTS file exists
+      stat:
+        path: "/tmp/{{ dtb_file_name.split('.') | first }}.dts"
+      register: dts_file
+
+    - name: Check that the DTS file exists
+      ansible.builtin.assert:
+        that: dts_file.stat.exists == true
+        fail_msg: "The DTS file was not created"
+        success_msg: "The DTS file was created successfully in the /tmp directory"
+
+    # Find GPIO debug file
+    - name: Find debug GPIO file
+      ansible.builtin.find:
+        paths: /sys/kernel
+        patterns: "gpio"
+        recurse: yes
+        file_type: file
+      register: gpio_path_info
+      become: true
+    - debug:
+        msg: "- GPIO: {{ item.path }}"
+      loop: "{{ gpio_path_info.files }}"
+
+    - set_fact:
+        gpio_path: "{{ gpio_path_info.files[0].path }}"
+    - debug:
+        msg: "GPIO offset: {{ gpio_path }}"
+
+    # Get GPIO base
+    - name: Get GPIO base
+      shell: "cat {{ gpio_path }} | grep '{{ gpiochip }}' | awk -F '[ ,:-]+' '{print $3}'"
+      register: gpio_info
+      changed_when: false
+      become: true
+    - set_fact:
+        gpio_base: "{{ gpio_info.stdout }}"
+    - debug:
+        msg: "GPIO base: {{ gpio_base }}"
+
+    # Get PIN number
+    - name: Get PIN number {{ gpio_ir_pin }} for IR emmiter
+      shell: "cat {{ gpio_path }} | grep '{{ gpio_ir_pin }}' | awk '{print $1}' | cut -d '-' -f 2"
+      register: gpio_ir_pin_num
+      changed_when: false
+      become: true
+    - debug:
+        msg: "GPIO Number for PIN {{ gpio_ir_pin }} : {{ gpio_ir_pin_num.stdout }}"
+    - set_fact:
+        gpio_ir_pin_num: "{{ gpio_ir_pin_num.stdout }}"
+    - set_fact:
+        offset: "Offset: {{ (gpio_ir_pin_num | int) - (gpio_base | int) }}"
+
+    # Get PHANDLE
+    - name: Extract phandle from DTS
+      shell: >
+        awk -v pinctrl=$(awk -F '[ ,:]+' '/{{ gpiochip }}/ {print $6}' {{ gpio_path }}) '
+        $0 ~ pinctrl {in_section=1}
+        in_section && $0 ~ /bank/ {in_bank=1}
+        in_bank && $0 ~ /phandle/ {gsub(/[<>;]/, "", $NF); print $NF; exit}
+        in_section && $0 ~ /};/ {in_section=0}' /tmp/{{ dtb_file_name.split('.')[0] }}.dts
+      register: phandle_output
+      changed_when: false
+
+    - name: Debug phandle information
+      debug:
+        msg: "phandle: {{ phandle_output.stdout }}" # Display the extracted phandle for verification
+    - set_fact:
+        phandle: "{{ phandle_output.stdout }}"
+
+    - name: Check if ir-tx node is present
+      shell: "fdtget -l {{ dtb_file_path }} / | grep ir-tx"
+      register: irtx_node_present
+      changed_when: false
+    - debug:
+        msg: "fdtput output: {{ irtx_node_present }}"
+
+    # Modify the DTB file
+    - name: Add node for IR emmiter
+      block:
+        - name: Create node for IR emmiter
+          shell: "fdtput -v -c {{ dtb_file_path }} /ir-tx"
+          register: fdtput_output
+          become: true
+        - debug:
+            msg: "fdtput output: {{ fdtput_output.stdout }}"
+      when: irtx_node_present.rc != 0
+
+    - name: Set compatible property in ir-tx node
+      shell: 'fdtput -t s {{ dtb_file_path }} /ir-tx compatible "gpio-ir-tx"'
+      become: true
+
+    - name: Set GPIOs property in ir-tx node
+      shell: 'fdtput -t x {{ dtb_file_path }} /ir-tx "gpios" {{ phandle }} {{ offset }} 0x00'
+      become: true
+  when: "kernel_version.stdout is version('5.9.0', '>', strict=true)"

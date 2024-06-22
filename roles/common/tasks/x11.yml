@@ -1,0 +1,34 @@
+---
+- name: Ensure X11 forwarding is enabled on the server side
+  ansible.builtin.lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: '^#?X11Forwarding'
+    line: 'X11Forwarding yes'
+    firstmatch: true
+  become: true
+
+- name: Ensure X11 forwarding is enabled on the server side
+  ansible.builtin.lineinfile:
+    path: /etc/ssh/ssh_config
+    regexp: '^#?ForwardX11'
+    insertafter: 'Host *'
+    line: 'ForwardX11 yes'
+    firstmatch: true
+  become: true
+
+- name: Restart SSH service
+  ansible.builtin.service:
+    name: ssh
+    state: restarted
+  become: true
+
+- name: Verify X11 forwarding is active in configuration
+  ansible.builtin.shell: grep -i 'X11Forwarding yes' /etc/ssh/sshd_config | wc -l
+  register: x11_enabled_config
+  changed_when: false
+
+- name: Display X11 forwarding configuration status
+  ansible.builtin.debug:
+    msg: "X11 forwarding is configured: {{ x11_enabled_config.stdout == '1' }}"
+
+# client configuration

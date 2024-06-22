@@ -39,6 +39,7 @@
   loop:
     - htop # there is a cooler version for macos
     - handbrake
+    - x11-apps
   become: true
   when: ansible_os_family != 'Darwin'
   tags: [ packages ]
@@ -62,6 +63,10 @@
 - name: Include ssh tasks
   import_tasks: "ssh.yml"
   tags: [ ssh, minimal ]
+
+- name: Include x11 tasks
+  import_tasks: "x11.yml"
+  tags: [ x11, minimal ]
 
 - name: Remove unused packages.
   package:

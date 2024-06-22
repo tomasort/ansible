@@ -7,8 +7,13 @@
     - geerlingguy.certbot
     - role: geerlingguy.mac.homebrew
       vars:
+        mas_uninstalled_apps: []
         mas_installed_app_ids:
-          - 497799835 # Xcode
+          - 497799835 # Xcode (Free)
+          - 1410709951 # Smart Countdown Timer (Free)
+          - 1120214373 # Battery Health 2: Stats & Info (Free)
+          - 1395414535 # TaskTab: Simple To Do List (Free)
+          - 441258766 # Magnet (Paid, now: $4.99, I think I paid 2.99 or something)
         homebrew_installed_packages:
           - ssh-copy-id
           - ipython
@@ -31,6 +36,7 @@
           - wireshark
           - putty
           - virtualbox
+          - xquartz
           - docker
           - google-chrome
           - visual-studio-code

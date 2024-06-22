@@ -5,6 +5,19 @@
     state: present
   become: true
 
+- name: Ensure ruby is installed (for colorls).
+  package:
+    name:
+      - ruby
+      - ruby-dev
+      - ruby-colorize
+    state: present
+  become: true
+
+- name: Install colorls 
+  shell: gem install colorls 
+  become: true
+
 - name: Check current shell
   command: echo $SHELL
   register: shell
@@ -54,6 +67,12 @@
   ansible.builtin.git:
     repo: 'https://github.com/zsh-users/zsh-history-substring-search.git'
     dest: "{{ home }}/.oh-my-zsh/custom/plugins/zsh-history-substring-search"
+
+- name: Install zsh-history-substring-search
+  ansible.builtin.git:
+    repo: 'https://github.com/romkatv/powerlevel10k'
+    dest: "{{ home }}/.oh-my-zsh/custom/plugins/powerlevel10k"
+# to use this, we need to change the theme to: powerlevel10k/powerlevel10k
 
 - debug: 
     msg: "Using the zsh theme {{ zsh_theme }}"

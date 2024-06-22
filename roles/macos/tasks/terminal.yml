@@ -1,0 +1,74 @@
+- name: Ensure iTerm2 is installed 
+  community.general.homebrew_cask:
+    name: iterm2 
+    state: present
+
+# Insall color scheme
+# curl -LJO https://raw.githubusercontent.com/mbadolato/iTerm2-Color-Schemes/master/schemes/GruvboxDark.itermcolors 
+# Change the preferences in com.googlecode.iterm2
+# The file has the colors and stuff in xml, but you can't use this directly in a plist file so we will have to figure that out. 
+
+- name: Install Font 
+  community.general.homebrew_cask:
+    name: font-hack-nerd-font
+    state: present
+
+# Set the font
+# Look for "Normal Font" = "HackNFP-Regular 14";
+# then you can set it using defaults write. Read the man pages and see if we can "decompile" the plist and then recompile with the value we want. 
+
+# remove the left arrow on prompt line
+# We need to set this to 0 "Show Mark Indicators" = 0; in the profile. 
+
+# silence the bell I think you would need to seaarch for "Silence Bell"
+
+# Install colorls
+# brew install ruby 
+# sudo gem install colorls
+
+# DOCK
+
+# Auto Hide dock
+# defaults write com.apple.dock "autohide" -bool "true" && killall Dock
+# check the value
+# defaults read com.apple.dock "autohide"
+
+# Set the sice of the icons in the dock
+# defaults write com.apple.dock "tilesize" -int "44" && killall Dock
+# Check the value
+# defaults read com.apple.dock "tilesize"
+
+# Set the time to hide
+# defaults write com.apple.dock "autohide-time-modifier" -float "0" && killall Dock
+# Check the value
+# defaults read com.apple.dock "autohide-time-modifier" 
+
+# Disable show-recents
+# defaults write com.apple.dock "show-recents" -bool "false" && killall Dock
+# Check the value
+# defaults read com.apple.dock "show-recents"
+
+# Also set the following: 
+# largesize = 47;
+# launchanim = 0;
+# magnification = 1;
+# orientation = bottom;
+# launchanim = 0;
+
+# SCREEN SHOTS
+
+# Disable the shadow on the bottom of screenshots
+# defaults write com.apple.screencapture "disable-shadow" -bool "true"
+
+# Set the screenshot directory
+# defaults write com.apple.screencapture "location" -string "~/Desktop" && killall SystemUIServer
+
+# Set the format of screenshots
+# defaults write com.apple.screencapture "type" -string "jpg"
+
+# FINDER
+
+# Set show extensions to true
+# defaults write NSGlobalDomain "AppleShowAllExtensions" -bool "true" && killall Finder
+
+ 
