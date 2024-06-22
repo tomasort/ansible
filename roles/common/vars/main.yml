@@ -15,7 +15,7 @@ pip_install_packages: []
 pipx_executable: pipx
 pipx_install_packages:
   - name: matplotlib
-  - name: numpy 
+  - name: numpy
   - name: pandas
   - name: jupyter
   - name: requests

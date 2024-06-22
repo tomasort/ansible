@@ -1,0 +1,53 @@
+- name: Get latest release URL
+  uri:
+    url: https://api.github.com/repos/ryanoasis/nerd-fonts/releases/latest
+    return_content: yes
+  register: release_info
+
+- debug:
+    var: nerd_font
+
+- name: "Find {{ nerd_font }} asset information"
+  set_fact:
+    nerd_font_asset: "{{ release_info.json | json_query('assets[?name==`' + nerd_font + '.zip`]') | first }}"
+
+- name: "Debug {{ nerd_font }} asset"
+  debug:
+    var: nerd_font_asset
+
+- name: "Extract download URL for {{ nerd_font }}.zip"
+  set_fact:
+    download_url: "{{ nerd_font_asset.browser_download_url }}"
+  when: nerd_font_asset is defined
+
+- name: Debug download URL
+  debug:
+    var: download_url
+
+- name: "Download {{ nerd_font }}.zip"
+  get_url:
+    url: "{{ download_url }}"
+    dest: "/tmp/{{ nerd_font_asset.name }}"
+  changed_when: false
+  become: true # If you need elevated privileges to download to /tmp
+
+- name: Ensure fonts directory exists
+  file:
+    path: "/{{ user }}/.local/share/fonts/{{ nerd_font }}"
+    state: directory
+    mode: "0755"
+    recurse: yes
+  become: true
+
+- name: Unzip the file
+  unarchive:
+    src: "/tmp/{{ nerd_font_asset.name }}"
+    dest: "/{{ user }}/.local/share/fonts/{{ nerd_font }}"
+    remote_src: yes
+    owner: "{{ user }}"
+  become: true
+
+- name: Update font cache
+  command: fc-cache -f -v
+  become: true
+  changed_when: false

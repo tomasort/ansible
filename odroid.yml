@@ -16,4 +16,7 @@
     - role: odroid
       vars:
         dist_update: false
-    - ubuntu
+    - role: ubuntu
+      vars:
+        nerd_font: FiraCode
+      tags: [ubuntu]

@@ -1,2 +1,4 @@
 ---
 # vars file for ubuntu
+home: "{{ lookup('env', 'HOME') }}"
+user: "{{ lookup('env', 'USER') }}"

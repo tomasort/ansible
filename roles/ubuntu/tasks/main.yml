@@ -1,6 +1,33 @@
----
 # tasks file for ubuntu
 - name: Install alsa-utils
-  apt:
+  package:
     name: alsa-utils
     state: present
+  become: true
+  tags: [packages]
+
+- name: Install fonts
+  import_tasks: "nerd_fonts.yml"
+  tags: [fonts]
+
+- name: Install fail2ban (Debian).
+  package:
+    name: fail2ban
+    state: present
+  # when: ansible_os_family == 'Debian'
+  become: true
+  tags: [packages]
+
+- name: Ensure fail2ban is running and enabled on boot.
+  service:
+    name: fail2ban
+    state: started
+    enabled: yes
+  become: true
+# TODO: Configure fail2ban which is probably in /etc/fail2ban
+
+- name: Install pyopenssl python package
+  ansible.builtin.pip:
+    name: pyopenssl
+    extra_args: --break-system-packages
+  become: true
