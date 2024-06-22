@@ -6,7 +6,7 @@
         {
             "label": "echo",
             "type": "shell",
-            "command": "ansible-playbook --become-password-file become.txt --vault-password-file password.txt --skip-tags packages -t gpio odroid.yml",
+            "command": "ansible-playbook --become-password-file become.txt --vault-password-file password.txt --skip-tags packages -t drivers odroid.yml",
             "problemMatcher": [],
             "group": {
                 "kind": "build",

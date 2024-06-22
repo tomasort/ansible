@@ -6,10 +6,7 @@
     upgrade: yes
   become: true
   when: package_upgrade == true
-  tags: [ packages, updates ]
-
-- debug:
-    msg: "Upgrade distribution? {{ dist_update }}"
+  tags: [packages, updates]
 
 - name: Distribution upgrade
   ansible.builtin.apt:
@@ -17,7 +14,7 @@
     upgrade: dist
   become: true
   when: dist_update == true
-  tags: [ packages, updates ]
+  tags: [packages, updates]
 
 - name: Install packages specific to Odroid SBCs
   package:
@@ -31,12 +28,12 @@
     - network-manager
     - ufw
   become: true
-  tags: [ packages ]
+  tags: [packages]
 
-- name: Include network configuration tasks 
+- name: Include network configuration tasks
   import_tasks: "network.yml"
-  tags: [ network ] 
+  tags: [network]
 
-- name: Include gpio configuration tasks 
+- name: Include gpio configuration tasks
   import_tasks: "gpio.yml"
-  tags: [ gpio ] 
+  tags: [gpio]

@@ -1,6 +1,6 @@
-- hosts: localhost 
+- hosts: localhost
   tags: odroid
-  vars: 
+  vars:
     dist_update: false
     package_upgrade: false
   roles:
@@ -12,6 +12,8 @@
           - "{{ lookup('env', 'USER') }}"
           - root
         docker_install_compose: true
-      tags: [ docker ]
-    - odroid
+      tags: [docker]
+    - role: odroid
+      vars:
+        dist_update: false
     - ubuntu

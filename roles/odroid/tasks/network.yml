@@ -1,51 +1,58 @@
 ---
-- name: Clone RTL8812AU driver repository at specific commit
-  git:
-    repo: 'https://github.com/aircrack-ng/rtl8812au.git'
-    dest: "/tmp/rtl8812au"
-    version: '63cf0b4'  # specify the commit hash here
-    force: yes
-  tags: [ drivers, wifi ]
-
 - name: Check if RTL88XXAU module is loaded
   ansible.builtin.shell: "lsmod | grep -qw 88XXau"
   register: rtl88XXau_module_check
   changed_when: false
-  tags: [ drivers, wifi ]
+  tags: [drivers, wifi]
 
-- name: Build and install RTL88XXAU Wi-Fi driver
-  ansible.builtin.command: "make dkms_install"
-  args:
-    chdir: "/tmp/rtl8812au"
-  tags: [ drivers, wifi ]
-  become: true
+- name: Install RTL8812AU Driver
+  block:
+    - name: Clone RTL8812AU driver repository at specific commit
+      git:
+        repo: "https://github.com/aircrack-ng/rtl8812au.git"
+        dest: "/tmp/rtl8812au"
+        version: "63cf0b4" # specify the commit hash here
+        force: yes
+
+    - name: Build and install RTL88XXAU Wi-Fi driver
+      ansible.builtin.command: "make dkms_install"
+      args:
+        chdir: "/tmp/rtl8812au"
+      become: true
+
+    - name: Load the Wi-Fi driver module
+      modprobe:
+        name: 88XXau
+        state: present
+        persistent: present
+      become: true
   when: rtl88XXau_module_check.rc != 0
+  tags: [drivers, wifi]
 
-- name: Load the Wi-Fi driver module
-  modprobe:
-    name: 88XXau
+- name: Ensure Network Manager is installed.
+  package:
+    name: network-manager
     state: present
-    persistent: present 
-  tags: [ drivers, wifi ]
   become: true
+  tags: [wifi]
 
 - name: Start and enable NetworkManager service
   systemd:
     name: NetworkManager
     state: started
     enabled: true
-  tags: [ wifi ]
-    
+  tags: [wifi]
+
 - name: Check wlan0 status
   ansible.builtin.command: "ip link show wlan0"
   register: wlan0_status
   changed_when: false
-  tags: [ wifi ]
-  
+  tags: [wifi]
+
 - name: Ensure wlan0 is up
   ansible.builtin.command: "ip link set wlan0 up"
   when: "'state DOWN' in wlan0_status.stdout"
-  tags: [ wifi ]
+  tags: [wifi]
 
 - name: Create wifi connection
   community.general.nmcli:
@@ -53,17 +60,24 @@
     conn_name: "TRNetwork"
     ifname: wlan0
     ssid: "{{ TRNetwork.wifi_name }}"
-    wifi_sec: 
+    wifi_sec:
       key-mgmt: wpa-psk
       psk: "{{ TRNetwork.wifi_password }}"
     state: present
     autoconnect: true
   become: true
-  tags: [ wifi ]
+  tags: [wifi]
+
+- name: Ensure ufw is installed.
+  package:
+    name: ufw
+    state: present
+  become: true
+  tags: [firewall]
 
 - name: Configure open ports with ufw
   ufw:
-    rule: "{{ item.rule }}" 
+    rule: "{{ item.rule }}"
     port: "{{ item.port }}"
     proto: "{{ item.proto }}"
   with_items:
@@ -71,15 +85,15 @@
     - { rule: allow, port: 80, proto: tcp }
     - { rule: allow, port: 443, proto: tcp }
   become: true
-  tags: [ firewall ]
+  tags: [firewall]
 
 - name: Configure default incoming/outgoing rules with ufw
   ufw:
     direction: "{{ item.direction }}"
-    policy: "{{ item.policy }}" 
-    state: enabled  
+    policy: "{{ item.policy }}"
+    state: enabled
   with_items:
     - { direction: incoming, policy: deny }
     - { direction: outgoing, policy: allow }
   become: true
-  tags: [ firewall ]
+  tags: [firewall]
