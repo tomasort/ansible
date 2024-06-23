@@ -118,7 +118,9 @@ function myip() {
 }
 
 # Nicer prompt.
-export PS1=$'\n'"%F{green} %*%F %3~ %F{white}"$'\n'"$ "
+export PS1=$'\n'"%F{green}%*%F %3~ %F{white}"$'\n'"$ "
+
+export TZ="America/New_York"
 
 # Git aliases.
 alias gs='git status'
