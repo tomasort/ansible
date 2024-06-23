@@ -26,6 +26,7 @@ done
 
 # If no arguments are provided, run all commands
 if [ ${OPTIND} -eq 1 ]; then
+  sudo apt update
   sudo apt install -y software-properties-common
   sudo apt-add-repository --yes --update ppa:ansible/ansible
   sudo apt install -y ansible

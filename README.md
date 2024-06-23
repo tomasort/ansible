@@ -20,6 +20,11 @@ ansible-playbook --ask-become-pass --ask-vault-pass macos.yml
 ```shell
 ansible-playbook --ask-become-pass --ask-vault-pass odroid.yml
 ```
+When running on an odroid computer with a kernell >= 4.9 then you should probably run the following commands and then restart before running the ansible playbook. 
+```shell
+sudo apt upgrade -y
+sudo apt dist-upgrade -y
+```
 ## Raspberry Pi
 ```shell
 ansible-playbook --ask-become-pass --ask-vault-pass pi.yml
