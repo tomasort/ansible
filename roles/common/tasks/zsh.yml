@@ -64,11 +64,10 @@
     repo: 'https://github.com/zsh-users/zsh-history-substring-search.git'
     dest: "{{ home }}/.oh-my-zsh/custom/plugins/zsh-history-substring-search"
 
-- name: Install zsh-history-substring-search
+- name: Install powerlevel10k 
   ansible.builtin.git:
     repo: 'https://github.com/romkatv/powerlevel10k'
-    dest: "{{ home }}/.oh-my-zsh/custom/plugins/powerlevel10k"
-# to use this, we need to change the theme to: powerlevel10k/powerlevel10k
+    dest: "{{ home }}/.oh-my-zsh/custom/themes/powerlevel10k" # to use this, we need to change the theme to: powerlevel10k/powerlevel10k
 
 - debug: 
     msg: "Using the zsh theme {{ zsh_theme }}"
@@ -89,3 +88,9 @@
 
 - debug:
     msg: "The pluings being used in .zshrc are {{ grep_result.stdout_lines }} "
+
+- name: Create .p10k.zsh
+  copy:
+    src: .p10k.zsh
+    dest: "{{ [home, '.p10k.zsh'] | path_join }}"
+    mode: 0644
