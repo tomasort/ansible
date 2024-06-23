@@ -1,21 +1,4 @@
 ---
-# tasks file for odroid
-- name: Upgrade packages
-  ansible.builtin.apt:
-    update_cache: yes
-    upgrade: yes
-  become: true
-  when: package_upgrade == true
-  tags: [packages, updates]
-
-- name: Distribution upgrade
-  ansible.builtin.apt:
-    update_cache: yes
-    upgrade: dist
-  become: true
-  when: dist_update == true
-  tags: [packages, updates]
-
 - name: Install packages specific to Odroid SBCs
   package:
     name: "{{ item }}"

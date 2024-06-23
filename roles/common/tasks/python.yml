@@ -10,6 +10,7 @@
   package:
     name: "{{ pip_package }}"
     state: present
+  become: true
   tags: [ pip ]
 
 - name: Ensure pip packages are installed.
@@ -27,6 +28,7 @@
   package:
     name: "pipx"
     state: present
+  become: true
   tags: [ pip, pipx ]
 
 - name: Ensure pipx packages are installed.

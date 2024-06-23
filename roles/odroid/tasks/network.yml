@@ -3,6 +3,8 @@
   ansible.builtin.shell: "lsmod | grep -qw 88XXau"
   register: rtl88XXau_module_check
   changed_when: false
+  failed_when: false
+  become: true
   tags: [drivers, wifi]
 
 - name: Install RTL8812AU Driver

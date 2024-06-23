@@ -125,6 +125,7 @@
       shell: "fdtget -l {{ dtb_file_path }} / | grep ir-tx"
       register: irtx_node_present
       changed_when: false
+      failed_when: false
     - debug:
         msg: "fdtput output: {{ irtx_node_present }}"
 
