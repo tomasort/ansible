@@ -21,6 +21,8 @@
     state: present
   loop:
     - wget
+    - npm
+    - node
     - tmux
     - tree
     - openvpn
