@@ -25,3 +25,4 @@ pipx_install_packages:
   - name: nose
   - name: pytest
   - name: you-get
+  - name: archey4 

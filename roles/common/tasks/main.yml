@@ -12,6 +12,7 @@
     - fzf
     - nmap
     - iftop
+    - jq
   become: true
   tags: [ packages, minimal ]
 
