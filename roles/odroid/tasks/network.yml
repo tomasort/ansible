@@ -54,12 +54,18 @@
 - name: Ensure wlan0 is up
   ansible.builtin.command: "ip link set wlan0 up"
   when: "'state DOWN' in wlan0_status.stdout"
+  become: true
   tags: [wifi]
 
-- name: Create wifi connection
+- name: Ensure WiFi interface is managed by NetworkManager
+  command: nmcli device set wlan0 managed yes
+  become: true
+  tags: [wifi]
+
+- name: Create or update WiFi connection
   community.general.nmcli:
     type: wifi
-    conn_name: "TRNetwork"
+    conn_name: my-wifi
     ifname: wlan0
     ssid: "{{ TRNetwork.wifi_name }}"
     wifi_sec:
@@ -70,32 +76,19 @@
   become: true
   tags: [wifi]
 
-- name: Ensure ufw is installed.
-  package:
-    name: ufw
-    state: present
+- name: Ensure WiFi connection is active
+  command: nmcli connection up my-wifi
   become: true
-  tags: [firewall]
+  ignore_errors: true
+  tags: [wifi]
 
-- name: Configure open ports with ufw
-  ufw:
-    rule: "{{ item.rule }}"
-    port: "{{ item.port }}"
-    proto: "{{ item.proto }}"
-  with_items:
-    - { rule: allow, port: 22, proto: tcp }
-    - { rule: allow, port: 80, proto: tcp }
-    - { rule: allow, port: 443, proto: tcp }
-  become: true
-  tags: [firewall]
+- name: Check WiFi connection status
+  command: nmcli device status
+  register: wifi_status
+  changed_when: false
+  tags: [wifi]
 
-- name: Configure default incoming/outgoing rules with ufw
-  ufw:
-    direction: "{{ item.direction }}"
-    policy: "{{ item.policy }}"
-    state: enabled
-  with_items:
-    - { direction: incoming, policy: deny }
-    - { direction: outgoing, policy: allow }
-  become: true
-  tags: [firewall]
+- name: Display WiFi status
+  debug:
+    var: wifi_status.stdout_lines
+  tags: [wifi]

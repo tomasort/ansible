@@ -20,3 +20,7 @@
 - name: Include gpio configuration tasks
   import_tasks: "gpio.yml"
   tags: [gpio]
+
+- name: Include UFW configuration tasks
+  import_tasks: "ufw.yml"
+  tags: [ufw firewall]
