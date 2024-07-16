@@ -23,7 +23,7 @@
   loop:
     - wget
     - npm
-    - node
+    - nodejs
     - tmux
     - tree
     - openvpn
