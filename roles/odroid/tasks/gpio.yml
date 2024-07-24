@@ -102,7 +102,9 @@
     - set_fact:
         gpio_ir_pin_num: "{{ gpio_ir_pin_num.stdout }}"
     - set_fact:
-        offset: "Offset: {{ (gpio_ir_pin_num | int) - (gpio_base | int) }}"
+        offset: "{{ (gpio_ir_pin_num | int) - (gpio_base | int) }}"
+    - set_fact:
+        offset_hex: "{{ '0x%02X' | format(offset | int) }}"
 
     # Get PHANDLE
     - name: Extract phandle from DTS
@@ -145,6 +147,9 @@
       become: true
 
     - name: Set GPIOs property in ir-tx node
-      shell: 'fdtput -t x {{ dtb_file_path }} /ir-tx "gpios" {{ phandle }} {{ offset }} 0x00'
+      shell: 'fdtput -t x {{ dtb_file_path }} /ir-tx "gpios" {{ phandle }} {{ offset_hex }} 0x00'
       become: true
+    - name: Debug fdtput command
+      debug: 
+        msg: 'fdtput -t x {{ dtb_file_path }} /ir-tx "gpios" {{ phandle }} {{ offset_hex }} 0x00' 
   when: "kernel_version.stdout is version('5.9.0', '>', strict=true)"
