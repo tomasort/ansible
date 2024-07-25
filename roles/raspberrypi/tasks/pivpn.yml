@@ -1,3 +1,16 @@
+- name: Ensure ufw is installed.
+  package:
+    name: ufw
+    state: present
+  become: true
+
+- name: Ensure that the port for pivpn is open 
+  ufw:
+    rule: allow 
+    port: "{{ pivpn_port }}"
+    proto: udp
+  become: true
+
 - name: Download PiVPN install script
   get_url:
     url: https://install.pivpn.io
@@ -15,18 +28,3 @@
     cmd: "/tmp/install.sh --unattended {{ pivpn_config_path }}"
   args:
     creates: /etc/pivpn 
-
-- name: Ensure ufw is installed.
-  package:
-    name: ufw
-    state: present
-  become: true
-
-- name: Ensure that the port for pivpn is open 
-  ufw:
-    rule: "{{ item.rule }}"
-    port: "{{ item.port }}"
-    proto: "{{ item.proto }}"
-  with_items:
-    - { rule: allow, port: {{ pivpn_port }} , proto: udp }
-  become: true
