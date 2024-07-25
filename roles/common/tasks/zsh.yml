@@ -14,7 +14,7 @@
     state: present
   become: true
 
-- name: Install version 1.0 of vagrant
+- name: Install colorls
   community.general.gem:
     name: colorls 
     state: present
