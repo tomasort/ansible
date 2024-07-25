@@ -16,11 +16,17 @@
   args:
     creates: /etc/pivpn 
 
-- name: Ensure that the port is open 
+- name: Ensure ufw is installed.
+  package:
+    name: ufw
+    state: present
+  become: true
+
+- name: Ensure that the port for pivpn is open 
   ufw:
     rule: "{{ item.rule }}"
     port: "{{ item.port }}"
     proto: "{{ item.proto }}"
   with_items:
-    - { rule: allow, port: "{{ pivpn_port }}", proto: udp }
+    - { rule: allow, port: {{ pivpn_port }} , proto: udp }
   become: true
