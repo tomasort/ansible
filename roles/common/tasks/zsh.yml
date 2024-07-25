@@ -14,8 +14,14 @@
     state: present
   become: true
 
+- name: Install version 1.0 of vagrant
+  community.general.gem:
+    name: colorls 
+    state: present
+  become: true
+
 - name: Check current shell
-  command: echo $SHELL
+  shell: echo $SHELL
   register: shell
   changed_when: false
 
