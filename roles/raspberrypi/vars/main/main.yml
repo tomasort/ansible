@@ -1,0 +1,3 @@
+---
+# vars file for raspberrypi
+pivpn_config_path: "/tmp/pivpn_options.conf"

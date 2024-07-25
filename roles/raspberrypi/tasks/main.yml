@@ -1,2 +1,3 @@
----
-# tasks file for raspberrypi
+- name: Include pivpn configuration tasks
+  import_tasks: "pivpn.yml"
+  tags: [pivpn]

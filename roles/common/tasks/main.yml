@@ -71,6 +71,10 @@
   import_tasks: "x11.yml"
   tags: [ x11, minimal ]
 
+- name: Include fail2ban tasks
+  import_tasks: "fail2ban.yml"
+  tags: [ fail2ban, minimal ]
+
 - name: Remove unused packages.
   package:
     name:

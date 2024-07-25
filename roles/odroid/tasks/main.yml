@@ -5,11 +5,9 @@
     state: present
   loop:
     - device-tree-compiler
-    - v4l-utils
-    - build-essential
     - dkms
     - network-manager
-    - ufw
+    - build-essential
   become: true
   tags: [packages]
 
@@ -20,7 +18,3 @@
 - name: Include gpio configuration tasks
   import_tasks: "gpio.yml"
   tags: [gpio]
-
-- name: Include UFW configuration tasks
-  import_tasks: "ufw.yml"
-  tags: [ufw firewall]

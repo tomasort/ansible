@@ -5,6 +5,10 @@
     package_upgrade: false
   roles:
     - common
+    - role: ubuntu
+      vars:
+        nerd_font: FiraCode
+      tags: [ubuntu]
     - role: geerlingguy.docker
       become: true
       vars:
@@ -16,7 +20,3 @@
     - role: odroid
       vars:
         dist_update: false
-    - role: ubuntu
-      vars:
-        nerd_font: FiraCode
-      tags: [ubuntu]

@@ -1,0 +1,26 @@
+- name: Download PiVPN install script
+  get_url:
+    url: https://install.pivpn.io
+    dest: /tmp/install.sh
+    mode: '0755'
+
+- name: Create PiVPN configuration file from template
+  template:
+    src: pivpn.conf.j2
+    dest: "{{ pivpn_config_path }}"
+    mode: '0644'
+
+- name: Run PiVPN install script
+  command: 
+    cmd: "/tmp/install.sh --unattended {{ pivpn_config_path }}"
+  args:
+    creates: /etc/pivpn 
+
+- name: Ensure that the port is open 
+  ufw:
+    rule: "{{ item.rule }}"
+    port: "{{ item.port }}"
+    proto: "{{ item.proto }}"
+  with_items:
+    - { rule: allow, port: "{{ pivpn_port }}", proto: udp }
+  become: true

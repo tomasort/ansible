@@ -2,5 +2,18 @@
   tags: pi 
   roles:
     - common
-    - geerlingguy.docker
-    - raspberrypi
+    - role: ubuntu
+      vars:
+        nerd_font: FiraCode
+      tags: [ubuntu]
+    - role: geerlingguy.docker
+      become: true
+      vars:
+        docker_users:
+          - "{{ lookup('env', 'USER') }}"
+          - root
+        docker_install_compose: true
+      tags: [docker]
+    - role: raspberrypi
+      vars:
+        dist_update: false

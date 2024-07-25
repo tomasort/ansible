@@ -1,10 +1,11 @@
 ---
-- name: Ensure fail2ban is Installed.
-  apt:
-    name: fail2ban 
-    state: present 
-    when: ansible_os_family == 'Debian'
+- name: Install fail2ban (Debian).
+  package:
+    name: fail2ban
+    state: present
+  # when: ansible_os_family == 'Debian'
   become: true
+  tags: [packages]
 
 - name: Ensure fail2ban is running and enabled on boot.
   service:
@@ -12,3 +13,5 @@
     state: started 
     enabled: yes
   become: true
+  
+# TODO: Configure fail2ban which is probably in /etc/fail2ban
