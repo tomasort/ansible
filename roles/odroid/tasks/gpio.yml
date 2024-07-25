@@ -5,6 +5,15 @@
 - debug:
     msg: "Kernel version is {{ kernel_version.stdout }}"
 
+- name: Check if IR transmitter is configured
+  shell: "cat /sys/kernel/debug/gpio | grep ir-tx"
+  register: ir_tx_configured
+  changed_when: false
+  failed_when: false
+  become: true
+- debug:
+    msg: " {{ ir_tx_configured.rc }}"
+
 - name: Modify DTB tree for IR Blaster
   block:
     - name: Install the required packages
@@ -152,4 +161,6 @@
     - name: Debug fdtput command
       debug: 
         msg: 'fdtput -t x {{ dtb_file_path }} /ir-tx "gpios" {{ phandle }} {{ offset_hex }} 0x00' 
-  when: "kernel_version.stdout is version('5.9.0', '>', strict=true)"
+  when: 
+    - kernel_version.stdout is version('5.9.0', '>', strict=true)
+    - ir_tx_configured.rc != 0
