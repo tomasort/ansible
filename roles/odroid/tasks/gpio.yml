@@ -161,6 +161,7 @@
     - name: Debug fdtput command
       debug: 
         msg: 'fdtput -t x {{ dtb_file_path }} /ir-tx "gpios" {{ phandle }} {{ offset_hex }} 0x00' 
+    # TODO: try verifying if the GPIO is set correctly with sudo cat /sys/kernel/debug/gpio | grep ir-tx
   when: 
     - kernel_version.stdout is version('5.9.0', '>', strict=true)
     - ir_tx_configured.rc != 0
