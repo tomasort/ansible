@@ -8,6 +8,8 @@
     - dkms
     - network-manager
     - build-essential
+    - v4l-utils
+    - ir-keytable
   become: true
   tags: [packages]
 
