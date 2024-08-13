@@ -21,6 +21,7 @@
     name: "{{ item }}"
     state: present
   loop:
+    - moreutils
     - wget
     - npm
     - nodejs
