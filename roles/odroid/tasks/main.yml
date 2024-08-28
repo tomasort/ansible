@@ -10,7 +10,7 @@
     - build-essential
     - v4l-utils
     - ir-keytable
-    - default-jre
+    - default-jdk
   become: true
   tags: [packages]
 
