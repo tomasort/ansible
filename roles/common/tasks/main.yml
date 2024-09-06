@@ -13,6 +13,7 @@
     - nmap
     - iftop
     - jq
+    - bat
   become: true
   tags: [ packages, minimal ]
 
