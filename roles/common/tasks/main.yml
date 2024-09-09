@@ -6,6 +6,7 @@
     state: present
   loop:
     - zsh
+    - stow
     - git
     - vim
     - curl
