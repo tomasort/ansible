@@ -10,7 +10,6 @@
     - git
     - vim
     - curl
-    - fzf
     - nmap
     - iftop
     - jq
@@ -26,7 +25,6 @@
     - moreutils
     - wget
     - npm
-    - nodejs
     - tmux
     - tree
     - openvpn
@@ -77,6 +75,14 @@
 - name: Include fail2ban tasks
   import_tasks: "fail2ban.yml"
   tags: [ fail2ban, minimal ]
+
+- name: Include tmux tasks
+  import_tasks: "tmux.yml"
+  tags: [ tmux, minimal ]
+
+- name: Include node tasks
+  import_tasks: "node.yml"
+  tags: [ node, minimal ]
 
 - name: Remove unused packages.
   package:

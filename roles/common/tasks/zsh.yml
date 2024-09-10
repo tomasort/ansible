@@ -65,6 +65,11 @@
     repo: 'https://github.com/zsh-users/zsh-syntax-highlighting.git'
     dest: "{{ home }}/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting"
 
+- name: Install zsh-vi-mode 
+  ansible.builtin.git:
+    repo: 'https://github.com/jeffreytse/zsh-vi-mode.git'
+    dest: "{{ home }}/.oh-my-zsh/custom/plugins/zsh-vi-mode"
+
 - name: Install zsh-history-substring-search
   ansible.builtin.git:
     repo: 'https://github.com/zsh-users/zsh-history-substring-search.git'
@@ -100,3 +105,14 @@
     src: .p10k.zsh
     dest: "{{ [home, '.p10k.zsh'] | path_join }}"
     mode: 0644
+
+# Set up fzf
+- name: Download fzf 
+  ansible.builtin.git:
+    repo: 'https://github.com/junegunn/fzf.git'
+    depth: 1
+    dest: "{{ home }}/.fzf"
+
+- name: Install fzf 
+  ansible.builtin.command:
+    cmd: "{{ home }}/.fzf/install --all"
