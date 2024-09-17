@@ -10,3 +10,16 @@
     src: .vimrc
     dest: "{{ [home, '.vimrc'] | path_join }}"
     mode: 0644
+
+- name: Ensure autoload directory exists
+	file:
+		path: ~/.vim/autoload
+		state: directory
+		mode: '0755'
+		recurse: yes
+
+- name: Download vim-plug
+	get_url:
+		url: https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+		dest: ~/.vim/autoload/plug.vim
+		mode: '0644'

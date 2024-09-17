@@ -151,3 +151,15 @@ export PATH="$HOME/.local/bin:$PATH"
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
 
 bindkey -s ^f "tmux-sessionizer\n"
+
+# List all tmux sessions
+alias tls='tmux ls'
+
+# Attach to a named tmux session (usage: tat <session_name>)
+alias tat='tmux attach -t'
+
+# Create a new named tmux session (usage: tns <session_name>)
+alias tns='tmux new-session -s'
+
+# Kill a named tmux session (usage: tks <session_name>)
+alias tks='tmux kill-session -t'

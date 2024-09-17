@@ -116,3 +116,14 @@
 - name: Install fzf 
   ansible.builtin.command:
     cmd: "{{ home }}/.fzf/install --all"
+
+# Set up cht.sh so that we can search stuff in the terminal
+- name: Install cht.sh
+  ansible.builtin.command:
+    cmd: "curl https://cht.sh/:cht.sh -o {{ home }}/.local/bin/cht.sh"
+
+# Change permissions of cht.sh script to 755
+- name: Set permissions for cht.sh
+  ansible.builtin.file:
+    path: "{{ home }}/.local/bin/cht.sh"
+    mode: '0755'

@@ -35,8 +35,8 @@ filetype plugin on      " enable filetype-specific plugins
 set autoindent          " auto indenting
 set smartindent         " smart indenting
 set expandtab           " spaces instead of tabs
-set tabstop=2           " 2 spaces for tabs
-set shiftwidth=2        " 2 spaces for indentation
+set tabstop=4           " 2 spaces for tabs
+set shiftwidth=4        " 2 spaces for indentation
 
 " bells
 set noerrorbells        " turn off audio bell
@@ -63,3 +63,51 @@ inoremap {{     {
 inoremap {}     {}
 
 nnoremap <leader>x :!chmod +x %<CR>
+nnoremap <silent> <C-f> :silent !tmux neww tmux-sessionizer<CR>
+" PLUGINS
+" -----------------------------------
+call plug#begin()
+
+" List your plugins here
+Plug 'tpope/vim-sensible'
+Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
+Plug 'junegunn/fzf.vim'
+
+call plug#end()
+" ------------------------------------
+             
+" Fix the paste problem ( DELETE if using nvim)
+
+if exists("g:loaded_bracketed_paste")
+  finish
+endif
+let g:loaded_bracketed_paste = 1
+
+let &t_ti .= "\<Esc>[?2004h"
+let &t_te = "\e[?2004l" . &t_te
+
+function! XTermPasteBegin(ret)
+  set pastetoggle=<f29>
+  set paste
+  return a:ret
+endfunction
+
+execute "set <f28>=\<Esc>[200~"
+execute "set <f29>=\<Esc>[201~"
+map <expr> <f28> XTermPasteBegin("i")
+imap <expr> <f28> XTermPasteBegin("")
+vmap <expr> <f28> XTermPasteBegin("c")
+cmap <f28> <nop>
+cmap <f29> <nop>
+            
+     
+     
+     
+    
+     
+     
+     
+     
+    
+     
+     

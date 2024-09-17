@@ -16,3 +16,8 @@
     src: tmux-sessionizer 
     dest: "{{ [home, '.local', 'bin', 'tmux-sessionizer'] | path_join }}"
     mode: 0755
+
+- name: Install the Tmux plugin manager
+  ansible.builtin.git: 
+    repo: 'https://github.com/tmux-plugins/tpm.git'
+    dest: "{{ home }}/.tmux/plugins/tpm"

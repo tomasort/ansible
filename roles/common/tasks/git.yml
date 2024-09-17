@@ -22,3 +22,14 @@
     name: color.ui
     scope: global
     value: auto
+
+# We could even set up github here with gh
+- name: Make sure gh is installed
+  package:
+    name: gh 
+    state: present
+  become: true
+
+- name: Authenticate on Github
+  ansible.builtin.shell: 
+    cmd: "echo {{ github_token }} | gh auth login --git-protocol ssh --with-token"
