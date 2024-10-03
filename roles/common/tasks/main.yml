@@ -1,7 +1,7 @@
 ---
 # tasks file for common
 - name: Install minimal packages
-  package:
+  ansible.builtin.package:
     name: "{{ item }}"
     state: present
   loop:
@@ -15,11 +15,21 @@
     - jq
     - gh
     - bat
+    - ripgrep
+    - golang
+    - composer
+    - php
+    - luarocks
+    - julia
+    - maven
+    - xclip
+    - xsel # for cht.sh
+    - rlwrap # for cht.sh
   become: true
-  tags: [ packages, minimal ]
+  tags: [packages, minimal]
 
 - name: Install extra packages
-  package:
+  ansible.builtin.package:
     name: "{{ item }}"
     state: present
   loop:
@@ -35,10 +45,10 @@
     - ffmpeg
     - hashcat
   become: true
-  tags: [ packages ]
+  tags: [packages]
 
 - name: Install packages not for MacOS
-  package:
+  ansible.builtin.package:
     name: "{{ item }}"
     state: present
   loop:
@@ -47,43 +57,47 @@
     - x11-apps
   become: true
   when: ansible_os_family != 'Darwin'
-  tags: [ packages ]
+  tags: [packages]
 
-- name: Include zsh tasks 
-  import_tasks: "zsh.yml"
-  tags: [ zsh, dotfiles, shell, minimal ]
+- name: Include zsh tasks
+  ansible.builtin.import_tasks: "zsh.yml"
+  tags: [zsh, dotfiles, shell, minimal]
 
-- name: Include git tasks 
-  import_tasks: "git.yml"
-  tags: [ git, minimal ]
+- name: Include git tasks
+  ansible.builtin.import_tasks: "git.yml"
+  tags: [git, minimal]
 
-- name: Include vim tasks 
-  import_tasks: "vim.yml"
-  tags: [ vim, minimal ]
+- name: Include vim tasks
+  ansible.builtin.import_tasks: "vim.yml"
+  tags: [vim, minimal]
 
 - name: Include python tasks
-  import_tasks: "python.yml"
-  tags: [ python ]
+  ansible.builtin.import_tasks: "python.yml"
+  tags: [python]
 
 - name: Include ssh tasks
-  import_tasks: "ssh.yml"
-  tags: [ ssh, minimal ]
+  ansible.builtin.import_tasks: "ssh.yml"
+  tags: [ssh, minimal]
 
 - name: Include x11 tasks
-  import_tasks: "x11.yml"
-  tags: [ x11, minimal ]
+  ansible.builtin.import_tasks: "x11.yml"
+  tags: [x11, minimal]
 
 - name: Include fail2ban tasks
-  import_tasks: "fail2ban.yml"
-  tags: [ fail2ban, minimal ]
+  ansible.builtin.import_tasks: "fail2ban.yml"
+  tags: [fail2ban, minimal]
 
 - name: Include tmux tasks
-  import_tasks: "tmux.yml"
-  tags: [ tmux, minimal ]
+  ansible.builtin.import_tasks: "tmux.yml"
+  tags: [tmux, minimal]
 
 - name: Include node tasks
   import_tasks: "node.yml"
-  tags: [ node, minimal ]
+  tags: [node, minimal]
+
+- name: Include rust tasks
+  import_tasks: "rust.yml"
+  tags: [node, minimal]
 
 - name: Remove unused packages.
   package:
@@ -91,6 +105,6 @@
       - nano
       - sendmail
     state: absent
-    purge: yes
+    purge: true 
   become: true
-  tags: [ packages, cleanup, minimal ]
+  tags: [packages, cleanup, minimal ]

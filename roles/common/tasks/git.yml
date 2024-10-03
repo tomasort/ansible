@@ -33,3 +33,13 @@
 - name: Authenticate on Github
   ansible.builtin.shell: 
     cmd: "echo {{ github_token }} | gh auth login --git-protocol ssh --with-token"
+
+- name: Download lazygit
+  ansible.builtin.git: 
+    repo: "https://github.com/jesseduffield/lazygit.git"
+    dest: /tmp/lazygit
+
+- name: Install lazygit
+  ansible.builtin.command: go install
+  args:
+    chdir: /tmp/lazygit

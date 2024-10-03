@@ -11,3 +11,6 @@
 - name: Install pnpm
   ansible.builtin.shell: >
     curl -fsSL https://get.pnpm.io/install.sh | sh -
+
+- name: Install nevim package
+  ansible.builtin.shell: pnpm install -g neovim

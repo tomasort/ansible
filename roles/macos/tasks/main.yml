@@ -1,4 +1,6 @@
 ---
 # tasks file for macos
+#
+# Install reattach-to-user-namespace using brew
 
 # TODO: add macos to the zsh plugins
