@@ -23,6 +23,12 @@
     scope: global
     value: auto
 
+- name: 
+  community.general.git_config:
+    name: rerere.enabled
+    scope: global
+    value: true 
+
 # We could even set up github here with gh
 - name: Make sure gh is installed
   package:
