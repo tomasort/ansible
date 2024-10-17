@@ -1,6 +1,6 @@
 ---
 # tasks file for common
-- name: Install minimal packages
+- name: Install required/minimal packages
   ansible.builtin.package:
     name: "{{ item }}"
     state: present
@@ -25,8 +25,9 @@
     - xclip
     - xsel # for cht.sh
     - rlwrap # for cht.sh
+    - git-lfs
   become: true
-  tags: [packages, minimal]
+  tags: [packages, minimal, required]
 
 - name: Install extra packages
   ansible.builtin.package:
