@@ -28,3 +28,4 @@
 - name: Install Vim plugins via vim-plug
   ansible.builtin.command:
     cmd: vim --headless +PlugInstall +qall 
+
