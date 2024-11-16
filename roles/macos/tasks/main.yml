@@ -7,3 +7,8 @@
 
 # TODO: add aerospace comfiguration
 # TODO: add JankyBorders comfiguration
+
+# TODO: add the following line to the Info.plist file of XQuartz to avoid the icon in the dock (remember to not add any spaces)
+# <key>LSUIElement</key>
+# <true/>
+
