@@ -16,6 +16,11 @@
     firstmatch: true
   become: true
 
+# TODO: add a task to ensure that x11 is disabled for github.com. 
+# In other words, add: 
+# Host github.com
+#   ForwardX11 no
+
 - name: Restart SSH service
   ansible.builtin.service:
     name: ssh
