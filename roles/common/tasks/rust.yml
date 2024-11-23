@@ -19,3 +19,10 @@
   shell: /tmp/sh.rustup.rs -y
   tags:
     - rust
+
+
+# Install yazi
+- name: check if yazi is installed
+  shell: cargo install --locked yazi-fm yazi-cli
+  register: yazi_exists
+  ignore_errors: yes
