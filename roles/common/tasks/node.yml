@@ -20,5 +20,6 @@
     - typescript
     - eslint
     - prettier
+    # TODO: remove neovim from here
     - neovim
     - vite

@@ -1,4 +1,6 @@
 ---
+# TODO:  install neovim from source
+
 # vim configuration
 - name: Ensure vim is installed.
   package:
