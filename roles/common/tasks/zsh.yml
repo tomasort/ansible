@@ -117,10 +117,24 @@
   ansible.builtin.command:
     cmd: "{{ home }}/.fzf/install --all"
 
-# Set up cht.sh so that we can search stuff in the terminal
+# # Set up cht.sh so that we can search stuff in the terminal
+# - name: Install cht.sh if not installed
+#   ansible.builtin.command:
+#     cmd: "curl https://cht.sh/:cht.sh -o {{ home }}/.local/bin/cht.sh"
+
+# Ensure the target directory exists
+- name: Ensure ~/.local/bin directory exists
+  ansible.builtin.file:
+    path: "{{ home }}/.local/bin"
+    state: directory
+    mode: '0755'
+
+# Download cht.sh if not installed
 - name: Install cht.sh if not installed
-  ansible.builtin.command:
-    cmd: "curl https://cht.sh/:cht.sh -o {{ home }}/.local/bin/cht.sh"
+  ansible.builtin.get_url:
+    url: "https://cht.sh/:cht.sh"
+    dest: "{{ home }}/.local/bin/cht.sh"
+    mode: '0755'
 
 # Change permissions of cht.sh script to 755
 - name: Set permissions for cht.sh
