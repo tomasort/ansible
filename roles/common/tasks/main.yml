@@ -105,7 +105,7 @@
 
 - name: Include rust tasks
   ansible.builtin.import_tasks: "rust.yml"
-  tags: [node, minimal]
+  tags: [rust, minimal]
 
 - name: Remove unused packages.
   ansible.builtin.package:

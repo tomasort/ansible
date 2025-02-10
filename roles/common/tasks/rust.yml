@@ -17,10 +17,10 @@
     - rust
 
 - name: install rust/cargo
-  when: cargo_exists is failed
   shell: /tmp/sh.rustup.rs -y
   tags:
     - rust
+  when: cargo_exists is failed
 
 - name: Install yazi
   community.general.cargo:
@@ -29,5 +29,16 @@
   loop:
     - yazi-fm
     - yazi-cli
-  tags:
-    - rust
+
+- name: Check if navi is installed
+  ansible.builtin.stat:
+    path: "/usr/local/bin/navi"
+  register: navi_installed
+
+- name: Install navi if not installed
+  community.general.cargo:
+    name: "{{ item }}"
+    locked: true
+  loop:
+    - navi
+  when: not navi_installed.stat.exists

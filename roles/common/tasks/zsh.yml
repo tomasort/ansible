@@ -141,20 +141,3 @@
   ansible.builtin.file:
     path: "{{ home }}/.local/bin/cht.sh"
     mode: '0755'
-
-# Install navi
-- name: Clone navi
-  ansible.builtin.git:
-    repo: 'https://github.com/denisidoro/navi'
-    dest: "{{ home }}/.navi"
-
-- name: Check if navi is installed
-  ansible.builtin.stat:
-    path: "/usr/local/bin/navi"
-  register: navi_installed
-
-- name: Install navi if not installed
-  ansible.builtin.command:
-    cmd: "make BIN_DIR=/usr/local/bin install"
-    chdir: "{{ home }}/.navi"
-  when: not navi_installed.stat.exists
