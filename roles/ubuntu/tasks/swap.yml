@@ -1,0 +1,98 @@
+---
+- name: Get current swap
+  shell: set -o pipefail && free -b | awk '/^Swap:/{print $2}'  # More reliable than -g
+  args:
+    executable: /bin/bash
+  register: current_swap_bytes
+  changed_when: false
+
+- name: Get current swappiness
+  command: cat /proc/sys/vm/swappiness
+  register: current_swappiness
+  changed_when: false
+
+- name: Set should_continue
+  set_fact:
+    should_continue: "{{ current_swap_gb.stdout | int != swap.size_gb | int or current_swappiness.stdout | int != swap.swappiness | int }}"
+
+- name: Disable existing swap
+  become: true
+  command: swapoff -a
+  register: swapoff_result
+  retries: 3
+  delay: 5
+  until: swapoff_result is success
+  when: should_continue
+  ignore_errors: true
+
+- name: Wait for swap to be fully disabled
+  command: grep -v /swapfile /proc/swaps
+  register: swap_disabled
+  retries: 3
+  delay: 5
+  until: swap_disabled.rc == 0
+  when: should_continue
+
+- name: Remove old swap file
+  become: true
+  file:
+    path: /swapfile
+    state: absent
+  register: result
+  when: should_continue
+
+- name: Allocate the swap file using dd
+  become: true
+  command: dd if=/dev/zero of=/swapfile bs=1MB count={{ swap.size_gb * 1024 }}
+  when: should_continue
+
+- name: Verify swap file size
+  stat:
+    path: /swapfile
+  register: swapfile_stat
+  when: should_continue
+
+- name: Verify correct swap file size
+  assert:
+    that:
+      - swapfile_stat.stat.size | int == desired_swap_bytes | int
+    fail_msg: "Swap file size incorrect. Expected: {{ desired_swap_bytes }}, Got: {{ swapfile_stat.stat.size }}"
+  when: should_continue
+
+- name: Change permission of the swap file
+  become: true
+  file:
+    path: /swapfile
+    mode: "0600"
+  when: should_continue
+
+- name: Create a swap area on the swap file
+  become: true
+  command: mkswap /swapfile
+  when: should_continue
+
+- name: Activate the swap file as a swap memory
+  become: true
+  command: swapon /swapfile
+  when: should_continue
+
+- name: Append configuration in /etc/fstab
+  become: true
+  lineinfile:
+    path: /etc/fstab
+    line: "/swapfile swap swap defaults 0 0"
+    create: yes
+  when: should_continue
+
+- name: Set swappiness level
+  become: true
+  command: sysctl vm.swappiness={{ swap.swappiness }}
+  when: should_continue
+
+- name: Append configuration in /etc/sysctl.conf
+  become: true
+  lineinfile:
+    path: /etc/sysctl.conf
+    line: "vm.swappiness={{ swap.swappiness }}"
+    create: yes
+  when: should_continue

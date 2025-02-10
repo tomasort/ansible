@@ -1,7 +1,5 @@
 ---
 # tasks file for common
-
-# TODO: install the necessary packages to install neovim from source
 - name: Install required/minimal packages
   ansible.builtin.package:
     name: "{{ item }}"

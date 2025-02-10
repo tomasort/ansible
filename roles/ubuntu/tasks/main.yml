@@ -12,12 +12,16 @@
   tags: [packages]
 
 - name: Install fonts
-  import_tasks: "nerd_fonts.yml"
+  ansible.builtin.import_tasks: "nerd_fonts.yml"
   tags: [fonts]
 
 - name: Include UFW configuration tasks
-  import_tasks: "ufw.yml"
+  ansible.builtin.import_tasks: "ufw.yml"
   tags: [ufw firewall]
+
+- name: Include Swap file tasks
+  ansible.builtin.import_tasks: "swap.yml"
+  tags: [swap]
 
 - name: Install pyopenssl python package
   ansible.builtin.pip:
