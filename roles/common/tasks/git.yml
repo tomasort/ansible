@@ -39,7 +39,7 @@
 - name: Authenticate on Github
   ansible.builtin.shell:
     cmd: |
-      set -o pipefail
+      set -o pipefail &&
       echo {{ github_token }} | gh auth login --git-protocol ssh --with-token
 
 - name: Download lazygit
