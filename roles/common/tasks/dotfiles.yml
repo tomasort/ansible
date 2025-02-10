@@ -14,6 +14,7 @@
     - .zshrc
     - .bashrc
     - .profile
+    - .p10k.zsh
 
 - name: Run stow
   ansible.builtin.shell: "stow . --target {{ home }} --verbose=2"

@@ -20,7 +20,6 @@
     - composer
     - php
     - luarocks
-    - julia
     - maven
     - xclip
     - xsel # for cht.sh
@@ -64,13 +63,13 @@
   ansible.builtin.import_tasks: "zsh.yml"
   tags: [zsh, dotfiles, shell, minimal]
 
-- name: Include git tasks
-  ansible.builtin.import_tasks: "git.yml"
-  tags: [git, minimal]
-
 - name: Stow dotfiles
   ansible.builtin.import_tasks: "dotfiles.yml"
   tags: [dotfiles, minimal]
+
+- name: Include git tasks
+  ansible.builtin.import_tasks: "git.yml"
+  tags: [git, minimal]
 
 # - name: Include vim tasks
 #   ansible.builtin.import_tasks: "vim.yml"
