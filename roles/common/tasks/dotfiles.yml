@@ -3,7 +3,7 @@
 - name: Clone the dotfiles repo
   ansible.builtin.git:
     repo: 'https://github.com/tomasort/dotfiles'
-    dest: '{{ home }}'
+    dest: '{{ home }}/dotfiles'
     clone: true
 
 - name: Remove files that will conflict with Stow
