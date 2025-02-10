@@ -15,6 +15,17 @@
     - .bashrc
     - .profile
     - .p10k.zsh
+    - .lynxrc
+    - ".local/bin/cht.sh"
+    - .vimrc
+    - .inputrc
+    - .editrc
+    - ".config/nvim/init.vim"
+    - ".config/neofetch/config.conf"
+    - ".config/htop/htoprc"
+    - ".config/gh/config.yml"
+    - ".config/lazygit/config.yml"
+    - ".config/bat/config"
 
 - name: Run stow
   ansible.builtin.shell: "stow . --target {{ home }} --verbose=2"
