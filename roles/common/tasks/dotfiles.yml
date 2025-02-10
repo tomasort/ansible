@@ -1,0 +1,23 @@
+---
+# clone the dotfiles repo and stow the files
+- name: Clone the dotfiles repo
+  ansible.builtin.git:
+    repo: 'https://github.com/tomasort/dotfiles'
+    dest: '{{ home }}'
+    clone: true
+
+- name: Remove files that will conflict with Stow
+  ansible.builtin.file:
+    path: "{{ [home, item] | path_join }}"
+    state: absent
+  loop:
+    - .zshrc
+    - .bashrc
+    - .profile
+
+- name: Run stow
+  ansible.builtin.shell: "stow . --target {{ home }} --verbose=2"
+  args:
+    chdir: "{{ [home, 'dotfiles'] | path_join }}"
+  register: result
+  changed_when: 'result.stderr is search("LINK: ")'

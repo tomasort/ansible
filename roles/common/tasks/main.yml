@@ -70,9 +70,17 @@
   ansible.builtin.import_tasks: "git.yml"
   tags: [git, minimal]
 
-- name: Include vim tasks
-  ansible.builtin.import_tasks: "vim.yml"
-  tags: [vim, minimal]
+- name: Stow dotfiles
+  ansible.builtin.import_tasks: "dotfiles.yml"
+  tags: [dotfiles, minimal]
+
+# - name: Include vim tasks
+#   ansible.builtin.import_tasks: "vim.yml"
+#   tags: [vim, minimal]
+
+- name: Include nvim tasks
+  ansible.builtin.import_tasks: "nvim.yml"
+  tags: [nvim, minimal]
 
 - name: Include python tasks
   ansible.builtin.import_tasks: "python.yml"
@@ -95,19 +103,19 @@
   tags: [tmux, minimal]
 
 - name: Include node tasks
-  import_tasks: "node.yml"
+  ansible.builtin.import_tasks: "node.yml"
   tags: [node, minimal]
 
 - name: Include rust tasks
-  import_tasks: "rust.yml"
+  ansible.builtin.import_tasks: "rust.yml"
   tags: [node, minimal]
 
 - name: Remove unused packages.
-  package:
+  ansible.builtin.package:
     name:
       - nano
       - sendmail
     state: absent
-    purge: true 
+    purge: true
   become: true
-  tags: [packages, cleanup, minimal ]
+  tags: [packages, cleanup, minimal]

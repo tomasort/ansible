@@ -1,7 +1,7 @@
 # Git configuration
 - name: Ensure git is installed.
   package:
-    name: git 
+    name: git
     state: present
   become: true
 
@@ -23,25 +23,27 @@
     scope: global
     value: auto
 
-- name: 
+- name: Enable rerere in git
   community.general.git_config:
     name: rerere.enabled
     scope: global
-    value: true 
+    value: true
 
 # We could even set up github here with gh
 - name: Make sure gh is installed
   package:
-    name: gh 
+    name: gh
     state: present
   become: true
 
 - name: Authenticate on Github
-  ansible.builtin.shell: 
-    cmd: "echo {{ github_token }} | gh auth login --git-protocol ssh --with-token"
+  ansible.builtin.shell:
+    cmd: |
+      set -o pipefail
+      echo {{ github_token }} | gh auth login --git-protocol ssh --with-token
 
 - name: Download lazygit
-  ansible.builtin.git: 
+  ansible.builtin.git:
     repo: "https://github.com/jesseduffield/lazygit.git"
     dest: /tmp/lazygit
 

@@ -1,10 +1,8 @@
 ---
-# TODO:  install neovim from source
-
 # vim configuration
 - name: Ensure vim is installed.
   package:
-    name: vim 
+    name: vim
     state: present
   become: true
 
@@ -16,18 +14,17 @@
 
 - name: Ensure autoload directory exists
   file:
-      path: ~/.vim/autoload
-      state: directory
-      mode: '0755'
-      recurse: yes
+    path: ~/.vim/autoload
+    state: directory
+    mode: '0755'
+    recurse: true
 
 - name: Download vim-plug
   get_url:
-      url: https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
-      dest: ~/.vim/autoload/plug.vim
-      mode: '0644'
+    url: https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+    dest: ~/.vim/autoload/plug.vim
+    mode: '0644'
 
 - name: Install Vim plugins via vim-plug
   ansible.builtin.command:
-    cmd: vim --headless +PlugInstall +qall 
-
+    cmd: vim --headless +PlugInstall +qall

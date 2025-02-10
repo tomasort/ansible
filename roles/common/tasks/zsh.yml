@@ -1,7 +1,7 @@
 # Zsh configuration
 - name: Ensure zsh is installed.
   package:
-    name: zsh 
+    name: zsh
     state: present
   become: true
 
@@ -16,7 +16,7 @@
 
 - name: Install colorls
   community.general.gem:
-    name: colorls 
+    name: colorls
     state: present
   become: true
 
@@ -30,7 +30,7 @@
   args:
     executable: /bin/bash
   become: true
-  when: "'zsh' not in shell.stdout" 
+  when: "'zsh' not in shell.stdout"
 
 - debug:
     msg: "Using shell {{ lookup('env', 'SHELL') }}"
@@ -65,7 +65,7 @@
     repo: 'https://github.com/zsh-users/zsh-syntax-highlighting.git'
     dest: "{{ home }}/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting"
 
-- name: Install zsh-vi-mode 
+- name: Install zsh-vi-mode
   ansible.builtin.git:
     repo: 'https://github.com/jeffreytse/zsh-vi-mode.git'
     dest: "{{ home }}/.oh-my-zsh/custom/plugins/zsh-vi-mode"
@@ -75,20 +75,20 @@
     repo: 'https://github.com/zsh-users/zsh-history-substring-search.git'
     dest: "{{ home }}/.oh-my-zsh/custom/plugins/zsh-history-substring-search"
 
-- name: Install powerlevel10k 
+- name: Install powerlevel10k
   ansible.builtin.git:
     repo: 'https://github.com/romkatv/powerlevel10k'
     dest: "{{ home }}/.oh-my-zsh/custom/themes/powerlevel10k" # to use this, we need to change the theme to: powerlevel10k/powerlevel10k
 
-- debug: 
+- debug:
     msg: "Using the zsh theme {{ zsh_theme }}"
 
-- name: Create .zshr 
+- name: Create .zshr
   ansible.builtin.template:
     src: templates/.zshrc.j2
     dest: "{{ [home, '.zshrc'] | path_join }}"
     mode: 0644
-  vars: 
+  vars:
     zsh_plugins: "web-search vi-mode zsh-autosuggestions zsh-syntax-highlighting zsh-history-substring-search"
 
 - name: Read contents matching regex from ~/.zshrc
@@ -107,13 +107,13 @@
     mode: 0644
 
 # Set up fzf
-- name: Download fzf 
+- name: Download fzf
   ansible.builtin.git:
     repo: 'https://github.com/junegunn/fzf.git'
     depth: 1
     dest: "{{ home }}/.fzf"
 
-- name: Install fzf 
+- name: Install fzf
   ansible.builtin.command:
     cmd: "{{ home }}/.fzf/install --all"
 

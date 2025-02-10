@@ -9,9 +9,8 @@
 
 - name: Ensure fail2ban is running and enabled on boot.
   service:
-    name: fail2ban 
-    state: started 
+    name: fail2ban
+    state: started
     enabled: yes
   become: true
-  
 # TODO: Configure fail2ban which is probably in /etc/fail2ban
