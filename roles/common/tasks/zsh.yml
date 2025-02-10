@@ -97,8 +97,8 @@
 #   register: grep_result
 #   changed_when: false
 
-- debug:
-    msg: "The pluings being used in .zshrc are {{ grep_result.stdout_lines }} "
+# - debug:
+#     msg: "The pluings being used in .zshrc are {{ grep_result.stdout_lines }} "
 
 # - name: Create .p10k.zsh
 #   copy:
