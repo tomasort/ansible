@@ -1,6 +1,6 @@
 ---
 - name: Check if swap is turned on
-  shell: free | awk '/^Swap:/ {exit $2 == 0}'
+  shell: free | awk '/^Swap:/ {exit $2 != 0}'
   register: swap_active
   ignore_errors: true
   changed_when: false
