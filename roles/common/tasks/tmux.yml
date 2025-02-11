@@ -10,5 +10,9 @@
     repo: 'https://github.com/tmux-plugins/tpm.git'
     dest: "{{ home }}/.tmux/plugins/tpm"
 
+- name: Reload TMUX environment so TPM is sourced
+  ansible.builtin.shell:
+    cmd: tmux source ~/.tmux.conf
+
 - name: Install tmux plugins
   ansible.builtin.shell: ~/.tmux/plugins/tpm/bin/install_plugins
