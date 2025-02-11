@@ -13,7 +13,8 @@
 
 - name: Set should_continue
   set_fact:
-    should_continue: "{{ current_swap_gb.stdout | int != swap.size_gb | int or current_swappiness.stdout | int != swap.swappiness | int }}"
+    should_continue: "{{ current_swap_bytes.stdout | int != (swap.size_gb * 1024 * 1024 * 1024) | int or current_swappiness.stdout | int != swap.swappiness | int }}"
+
 
 - name: Disable existing swap
   become: true

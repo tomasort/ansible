@@ -2,6 +2,3 @@
 # vars file for ubuntu
 home: "{{ lookup('env', 'HOME') }}"
 user: "{{ lookup('env', 'USER') }}"
-swap:
-  size_gb: 4
-  swappiness: 60
