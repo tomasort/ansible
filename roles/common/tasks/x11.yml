@@ -23,7 +23,9 @@
     block: |
       Host github.com
         ForwardX11 no
+    insertbefore: '^Host \*'
   become: true
+
 
 - name: Restart SSH service
   ansible.builtin.service:
