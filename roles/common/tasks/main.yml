@@ -59,6 +59,11 @@
   when: ansible_os_family != 'Darwin'
   tags: [packages]
 
+- name: Install Go
+  ansible.builtin.import_tasks: "go.yml"
+  when: ansible_os_family != 'Darwin'
+  tags: [go]
+
 - name: Include nvim tasks
   ansible.builtin.import_tasks: "nvim.yml"
   tags: [nvim, minimal]

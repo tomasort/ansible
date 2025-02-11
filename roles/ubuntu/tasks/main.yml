@@ -15,10 +15,6 @@
   ansible.builtin.import_tasks: "nerd_fonts.yml"
   tags: [fonts]
 
-- name: Install Go
-  ansible.builtin.import_tasks: "go.yml"
-  tags: [go]
-
 - name: Include UFW configuration tasks
   ansible.builtin.import_tasks: "ufw.yml"
   tags: [ufw firewall]

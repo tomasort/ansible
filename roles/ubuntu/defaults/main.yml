@@ -1,9 +1,4 @@
 nerd_font: FiraCode
-go_version: "1.23.6"
-go_platform: "linux"
-go_arch: "arm64"
-go_tarball: "go{{ go_version }}.{{ go_platform }}-{{ go_arch }}.tar.gz"
-go_download_url: "https://go.dev/dl/{{ go_tarball }}"
 swap:
   size_gb: 4
   swappiness: 60

@@ -1,11 +1,11 @@
 - hosts: localhost 
   tags: pi 
   roles:
+    - common
     - role: ubuntu
       vars:
         nerd_font: FiraCode
       tags: [ubuntu]
-    - common
     - role: geerlingguy.docker
       become: true
       vars:
