@@ -56,7 +56,7 @@
 - name: Verify correct swap file size
   assert:
     that:
-      - swapfile_stat.stat.size | int == desired_swap_bytes | int
+      - swapfile_stat.stat.size | int == (swap.size_gb * 1024 * 1024 * 1024) | int
     fail_msg: "Swap file size incorrect. Expected: {{ desired_swap_bytes }}, Got: {{ swapfile_stat.stat.size }}"
   when: should_continue
 
