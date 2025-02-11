@@ -1,6 +1,6 @@
 ---
 - name: Check if Go is already installed
-  command: /usr/local/go/bin/go version
+  command: go version
   ignore_errors: true
   register: go_version_result
   changed_when: false
@@ -16,13 +16,13 @@
 - name: Download Go tarball
   get_url:
     url: "{{ go_download_url }}"
-    dest: "/usr/local/src/{{ go_tarball }}"
+    dest: "/tmp/{{ go_tarball }}"
   when: go_version_result is failed
         or go_version not in go_version_result.stdout
 
 - name: Extract Go tarball
   unarchive:
-    src: "/usr/local/src/{{ go_tarball }}"
+    src: "/tmp/{{ go_tarball }}"
     dest: "/usr/local"
     remote_src: yes
   when: go_version_result is failed
