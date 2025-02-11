@@ -1,13 +1,16 @@
 ---
-- name: Check if swap file exists and is active
-  shell: swapon --show | grep -q '^/swapfile'
+- name: Check if swap is turned on
+  shell: free | awk '/^Swap:/ {exit $2 == 0}'
   register: swap_active
   ignore_errors: true
   changed_when: false
 
 - name: Set should_disable
   set_fact:
-    should_disable: "{{ not swap_active.rc == 0 }}"
+    should_disable: "{{ swap_active.rc == 1 }}"
+
+- debug: 
+    msg: "The flag for disabling and rebuilding the swap file is: {{ should_disable }}"
 
 - name: Disable existing swap
   become: true
