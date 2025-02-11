@@ -50,4 +50,4 @@
   args:
     chdir: /tmp/lazygit
   environment:
-    PATH: "/usr/local:{{ path }}"
+    PATH: "/usr/local/go/bin:{{ path }}"
