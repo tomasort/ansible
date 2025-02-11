@@ -46,3 +46,4 @@ The files that are encrypted can be decrypted with:
 ```shell
 xargs -n1 ansible-vault decrypt < (grep -v '^#' encrypted.txt) 
 ```
+You should verify what files are encrypted before calling this command
