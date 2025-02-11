@@ -1,11 +1,4 @@
 ---
-# clone the dotfiles repo and stow the files
-- name: Clone the dotfiles repo
-  ansible.builtin.git:
-    repo: 'https://github.com/tomasort/dotfiles'
-    dest: '{{ home }}/dotfiles'
-    clone: true
-
 - name: Remove files that will conflict with Stow
   ansible.builtin.file:
     path: "{{ [home, item] | path_join }}"
@@ -27,8 +20,16 @@
     - ".config/lazygit/config.yml"
     - ".config/bat/config"
 
+# clone the dotfiles repo and stow the files
+- name: Clone the dotfiles repo
+  ansible.builtin.git:
+    repo: 'https://github.com/tomasort/dotfiles'
+    dest: "{{ [home, 'dotfiles'] | path_join }}"
+    clone: true
+    force: true
+
 - name: Run stow
-  ansible.builtin.shell: "stow . --target {{ home }} --verbose=2"
+  ansible.builtin.shell: "stow . --verbose=2"
   args:
     chdir: "{{ [home, 'dotfiles'] | path_join }}"
   register: result

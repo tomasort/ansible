@@ -16,7 +16,6 @@
     - gh
     - bat
     - ripgrep
-    - golang
     - composer
     - php
     - luarocks
@@ -25,6 +24,7 @@
     - xsel # for cht.sh
     - rlwrap # for cht.sh
     - git-lfs
+    - neofetch
   become: true
   tags: [packages, minimal, required]
 
