@@ -59,6 +59,10 @@
   when: ansible_os_family != 'Darwin'
   tags: [packages]
 
+- name: Include nvim tasks
+  ansible.builtin.import_tasks: "nvim.yml"
+  tags: [nvim, minimal]
+
 - name: Include zsh tasks
   ansible.builtin.import_tasks: "zsh.yml"
   tags: [zsh, dotfiles, shell, minimal]
@@ -74,10 +78,6 @@
 # - name: Include vim tasks
 #   ansible.builtin.import_tasks: "vim.yml"
 #   tags: [vim, minimal]
-
-- name: Include nvim tasks
-  ansible.builtin.import_tasks: "nvim.yml"
-  tags: [nvim, minimal]
 
 - name: Include python tasks
   ansible.builtin.import_tasks: "python.yml"
