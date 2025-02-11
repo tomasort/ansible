@@ -39,3 +39,4 @@
     - eslint
     - prettier
     - vite
+  become: true
