@@ -57,7 +57,7 @@
   assert:
     that:
       - swapfile_stat.stat.size | int == (swap.size_gb * 1024 * 1024 * 1024) | int
-    fail_msg: "Swap file size incorrect. Expected: {{ desired_swap_bytes }}, Got: {{ swapfile_stat.stat.size }}"
+    fail_msg: "Swap file size incorrect. Expected: {{ (swap.size_gb * 1024 * 1024 * 1024) }}, Got: {{ swapfile_stat.stat.size }}"
   when: should_continue
 
 - name: Change permission of the swap file
