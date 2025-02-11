@@ -1,6 +1,6 @@
 ---
 - name: Check if Go is already installed
-  command: /usr/local/go version
+  command: /usr/local/go/bin/go version
   ignore_errors: true
   register: go_version_result
   changed_when: false
