@@ -1,16 +1,34 @@
 ---
-- name: Install nvm
-  ansible.builtin.shell: >
-    curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash
+# - name: Install nvm
+#   ansible.builtin.shell: >
+#     curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash
+#   args:
+#     creates: "{{ home }}/.nvm/nvm.sh"
+
+- name: Download NVM installation script
+  ansible.builtin.get_url:
+    url: "https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh"
+    dest: "/tmp/nvm-install.sh"
+    mode: "0755"
+
+- name: Run NVM installation script
+  ansible.builtin.command:
+    cmd: "/bin/bash /tmp/nvm-install.sh"
   args:
     creates: "{{ home }}/.nvm/nvm.sh"
 
-- name: Install Node
-  ansible.builtin.shell: nvm install --lts
+- name: Install Node using NVM
+  ansible.builtin.shell: |
+    source {{ home }}/.nvm/nvm.sh
+    nvm install --lts
+  args:
+    executable: /bin/bash
 
 - name: Install pnpm
-  ansible.builtin.shell: >
+  ansible.builtin.shell: |
     curl -fsSL https://get.pnpm.io/install.sh | sh -
+  args:
+    executable: /bin/bash
 
 - name: Install global packages with npm
   community.general.npm:
