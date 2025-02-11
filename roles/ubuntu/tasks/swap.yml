@@ -83,6 +83,7 @@
   shell: swapon --show | grep -q '^/swapfile'
   register: swap_active
   ignore_errors: true
+  become: true
 
 - name: Assert swap file is properly configured
   assert:
