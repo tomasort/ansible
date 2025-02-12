@@ -27,6 +27,7 @@
     - neofetch
     - default-jre
     - default-jdk
+    - lynx
   become: true
   tags: [packages, minimal, required]
 
