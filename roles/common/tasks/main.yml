@@ -25,6 +25,8 @@
     - rlwrap # for cht.sh
     - git-lfs
     - neofetch
+    - default-jre
+    - default-jdk
   become: true
   tags: [packages, minimal, required]
 

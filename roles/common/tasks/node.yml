@@ -40,3 +40,11 @@
     - prettier
     - vite
   become: true
+
+- name: Change ownership of the .npm directory dynamically
+  ansible.builtin.file:
+    path: "{{ home }}/.npm"
+    state: directory
+    recurse: true
+    owner: "{{ user }}"
+    group: "{{ user }}"
