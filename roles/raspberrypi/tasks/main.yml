@@ -2,7 +2,7 @@
 
 - name: Include pivpn configuration tasks
   import_tasks: "pivpn.yml"
-  tags: [pivpn]
+  tags: [pivpn, vpn]
 
 
 # TODO: add a task for turning the power save off in the raspberry pi `sudo nmcli con mod preconfigured wifi.powersave disable`

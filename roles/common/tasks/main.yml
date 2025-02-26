@@ -28,6 +28,7 @@
     - default-jre
     - default-jdk
     - lynx
+    - python3-debugpy
   become: true
   tags: [packages, minimal, required]
 
@@ -77,7 +78,7 @@
 
 - name: Include nvim tasks
   ansible.builtin.import_tasks: "nvim.yml"
-  tags: [nvim, minimal]
+  tags: [nvim, minimal, vim]
 
 - name: Include zsh tasks
   ansible.builtin.import_tasks: "zsh.yml"

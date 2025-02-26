@@ -26,5 +26,3 @@
 - name: Run PiVPN install script
   command: 
     cmd: "/tmp/install.sh --unattended {{ pivpn_config_path }}"
-  args:
-    creates: /etc/pivpn 
