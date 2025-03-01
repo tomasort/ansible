@@ -108,6 +108,10 @@
   ansible.builtin.import_tasks: "x11.yml"
   tags: [x11, minimal]
 
+- name: Include Latex tasks
+  ansible.builtin.import_tasks: "tex.yml"
+  tags: [tex, latex]
+
 - name: Include fail2ban tasks
   ansible.builtin.import_tasks: "fail2ban.yml"
   tags: [fail2ban, minimal]

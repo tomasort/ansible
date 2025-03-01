@@ -1,0 +1,29 @@
+---
+- name: Install basic LaTeX (texlive + recommended packages)
+  apt:
+    name:
+      - texlive
+      - texlive-latex-recommended
+      - texlive-fonts-recommended
+    state: present
+  become: true
+  # when: latex_installation_type == "basic"
+
+# - name: Install full LaTeX distribution
+  # apt:
+  #   name: texlive-full
+  #   state: present
+  # when: latex_installation_type == "full"
+
+# - name: Install minimal LaTeX base
+  # apt:
+  #   name: texlive-base
+  #   state: present
+  # when: latex_installation_type == "minimal"
+
+# - name: Install additional LaTeX packages
+#   apt:
+#     name: "{{ item }}"
+#     state: present
+#   loop: "{{ latex_additional_packages }}"
+#   when: latex_installation_type == "
