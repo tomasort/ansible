@@ -128,6 +128,10 @@
   ansible.builtin.import_tasks: "rust.yml"
   tags: [rust, minimal]
 
+- name: Include uv installation
+  ansible.builtin.import_tasks: "uv.yml"
+  tags: [uv, minimal]
+
 # TODO: install duf https://github.com/muesli/duf
 
 - name: Remove unused packages.

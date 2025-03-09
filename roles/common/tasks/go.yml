@@ -31,3 +31,16 @@
   when: go_version_result is failed
         or go_version not in go_version_result.stdout
   become: true
+
+# Packages that require go
+- name: Download duf
+  ansible.builtin.git:
+    repo: "https://github.com/muesli/duf.git"
+    dest: "/tmp/duf"
+    
+- name: Install duf
+  ansible.builtin.command: go install
+  args:
+    chdir: /tmp/duf
+  environment:
+    PATH: "/usr/local/go/bin:{{ path }}"
