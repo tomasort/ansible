@@ -26,3 +26,16 @@
 - name: Run PiVPN install script
   command: 
     cmd: "/tmp/install.sh --unattended {{ pivpn_config_path }}"
+
+- name: Copy archive from role files directory to remote server
+  copy:
+    src: "pivpnwgbackup.tgz"
+    dest: "/tmp/pivpnwgbackup.tgz"
+    mode: '0644'
+
+- name: Extract archive to root directory
+  ansible.builtin.unarchive:
+    src: "/tmp/pivpnwgbackup.tgz"
+    dest: "/"
+    remote_src: yes
+  become: yes  # This is equivalent to using sudo
