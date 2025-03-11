@@ -1,0 +1,27 @@
+- name: Download the packagecloud repository script
+  get_url:
+    url: https://packagecloud.io/install/repositories/ookla/speedtest-cli/script.deb.sh
+    dest: /tmp/speedtest-repo-setup.sh
+    mode: '0755'
+  become: false  # No need for sudo for just downloading
+
+- name: Execute the packagecloud repository script
+  command: bash /tmp/speedtest-repo-setup.sh
+  become: true  # Use sudo for installation
+  register: repo_setup
+  changed_when: repo_setup.rc == 0
+  args:
+    creates: /etc/apt/sources.list.d/ookla_speedtest-cli.list  # Prevent re-execution if already installed
+
+- name: Clean up the temporary script
+  file:
+    path: /tmp/speedtest-repo-setup.sh
+    state: absent
+  become: false
+
+- name: Install speedtest-cli package
+  apt:
+    name: speedtest
+    state: present
+    update_cache: yes
+  become: true
