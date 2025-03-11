@@ -23,9 +23,9 @@
   ansible.builtin.import_tasks: "swap.yml"
   tags: [swap]
 
-- name: Include speedtest file tasks
-  ansible.builtin.import_tasks: "speedtest.yml"
-  tags: [speedtest]
+# - name: Include speedtest file tasks
+#   ansible.builtin.import_tasks: "speedtest.yml"
+#   tags: [speedtest]
 
 - name: Install pyopenssl python package
   ansible.builtin.pip:

@@ -12,6 +12,7 @@
   changed_when: repo_setup.rc == 0
   args:
     creates: /etc/apt/sources.list.d/ookla_speedtest-cli.list  # Prevent re-execution if already installed
+  become: True
 
 - name: Clean up the temporary script
   file:
