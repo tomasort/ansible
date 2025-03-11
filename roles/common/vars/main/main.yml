@@ -14,10 +14,4 @@ pip_executable: "{{ 'pip3' if pip_package.startswith('python3') else 'pip' }}"
 pip_install_packages: []
 
 pipx_executable: pipx
-pipx_install_packages:
-  - name: matplotlib
-  - name: numpy
-  - name: pandas
-  - name: jupyter
-  - name: scipy
-  - name: scikit-learn
+pipx_install_packages: []
