@@ -33,6 +33,7 @@
     - poppler-utils 
     - fd-find  
     - zoxide 
+    - dnsmasq
   become: true
   tags: [packages, minimal, required]
 
