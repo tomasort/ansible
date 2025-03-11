@@ -29,6 +29,10 @@
     - default-jdk
     - lynx
     - python3-debugpy
+    - 7zip 
+    - poppler-utils 
+    - fd-find  
+    - zoxide 
   become: true
   tags: [packages, minimal, required]
 
@@ -38,6 +42,7 @@
     state: present
   loop:
     - moreutils
+    - imagemagick
     - wget
     - npm
     - tmux
