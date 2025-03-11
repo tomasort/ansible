@@ -1,7 +1,11 @@
 ---
 # Tasks to install uv
-- name: Install uv using Cargo
-  ansible.builtin.command:
-    cmd: cargo install --git https://github.com/astral-sh/uv uv
-  environment:
-    PATH: "{{ home }}/.cargo/bin:{{ path }}"
+# - name: Install uv using Cargo
+#   ansible.builtin.command:
+#     cmd: cargo install --git https://github.com/astral-sh/uv uv
+#   environment:
+#     PATH: "{{ home }}/.cargo/bin:{{ path }}"
+
+- name: Install uv using installation script
+  ansible.builtin.shell:
+    cmd: curl -LsSf https://astral.sh/uv/install.sh | sh
