@@ -21,3 +21,7 @@
 - name: Include gpio configuration tasks
   import_tasks: "gpio.yml"
   tags: [gpio]
+
+- name: Include hostname configuration tasks
+  import_tasks: "hostname.yml"
+  tags: [hostname]

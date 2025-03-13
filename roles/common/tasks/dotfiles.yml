@@ -1,37 +1,4 @@
 ---
-- name: Remove files that will conflict with Stow
-  ansible.builtin.file:
-    path: "{{ [home, item] | path_join }}"
-    state: absent
-  loop:
-    - .zshrc
-    - .tmux.conf
-    - .bashrc
-    - .profile
-    - ".ipython/profile_default"
-    - .p10k.zsh
-    - .lynxrc
-    - .gitignore
-    - ".local/bin/cht.sh"
-    - ".local/bin/cheeto"
-    - ".local/bin/pretty_tsv"
-    - ".local/bin/tmux_gh_sessionizer"
-    - ".local/bin/tmux-sessionizer"
-    - ".local/bin/tmux-windownizer"
-    - .vimrc
-    - .inputrc
-    - .editrc
-    - ".config/neofetch"
-    - ".config/gh"
-    - ".config/lazygit/config.yml"
-    - ".config/bat/config"
-    - ".config/github-copilot"
-    - ".config/go"
-    - ".config/htop"
-    - ".config/lazygit"
-    - ".config/matplotlib"
-    - ".config/nvim"
-
 # clone the dotfiles repo and stow the files
 - name: Clone the dotfiles repo
   ansible.builtin.git:
@@ -39,6 +6,11 @@
     dest: "{{ [home, 'dotfiles'] | path_join }}"
     clone: true
     force: true
+
+- name: Run pre-stow conflict resolution script
+  ansible.builtin.command: "./remove_conflicting_files.sh"
+  args:
+    chdir: "{{ [home, 'dotfiles'] | path_join }}"
 
 - name: Run stow
   ansible.builtin.shell: "stow . --verbose=2"

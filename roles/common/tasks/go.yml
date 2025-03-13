@@ -44,3 +44,16 @@
     chdir: /tmp/duf
   environment:
     PATH: "/usr/local/go/bin:{{ path }}"
+
+# Packages that require go
+- name: Download cheat
+  ansible.builtin.git:
+    repo: "github.com/cheat/cheat/cmd/cheat@latest"
+    dest: "/tmp/cheat"
+
+- name: Install cheat
+  ansible.builtin.command: go install
+  args:
+    chdir: /tmp/cheat
+  environment:
+    PATH: "/usr/local/go/bin:{{ path }}"

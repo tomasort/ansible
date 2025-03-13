@@ -1,0 +1,28 @@
+- name: Install Avahi daemon
+  apt:
+    name: avahi-daemon
+    state: present
+    update_cache: yes
+
+- name: Set system hostname
+  hostname:
+    name: "{{ new_hostname }}"
+  
+- name: Update /etc/hosts file
+  lineinfile:
+    path: /etc/hosts
+    regexp: '^127\.0\.1\.1'
+    line: "127.0.1.1       {{ new_hostname }}"
+    state: present
+  
+- name: Restart Avahi daemon
+  service:
+    name: avahi-daemon
+    state: restarted
+    enabled: yes
+  
+- name: Restart networking service
+  service:
+    name: networking
+    state: restarted
+  ignore_errors: yes  # Some systems might use different networking services
