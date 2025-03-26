@@ -49,3 +49,5 @@
 - name: Install Vim plugins via vim-plug
   ansible.builtin.command:
     cmd: nvim --headless +PlugInstall +qall
+
+# TODO: set the variable GITHUB_COPILOT_TOKEN or GH_COPILOT_TOKEN in the environment to the github token
