@@ -96,7 +96,3 @@ ansible-vault encrypt path/to/file
 - `odroid.yml` - Playbook for Odroid configuration
 - `pi.yml` - Playbook for Raspberry Pi configuration
 - `encrypted.txt` - List of encrypted files
-
-## License
-
-MIT
