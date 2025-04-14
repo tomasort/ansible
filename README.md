@@ -89,6 +89,27 @@ To encrypt a file:
 ansible-vault encrypt path/to/file
 ```
 
+### Content of encrypted files
+
+In `roles/common/vars/main/vault.yml` we need to put:
+- `github_token` - The token from github so that gh works.
+- `email` - The email that is supposed to be used with git
+
+In `roles/odroid/vars/main/vault.yml` we need:
+- `TRNetwork` wich should contain the `wifi_name` and the `wifi_password`
+
+In `roles/raspberrypi/vars/main/vault.yml` we have variables for the VPN 
+- `ipv4_dev`: network interface that we want to use for the vpn
+- `ipv4_addr`: local ip address
+- `ipv4_gw`: gateway ip address
+- `install_user`: name of the user
+- `pivpn_port`: port to use
+- `pivpn_dns1`: for example "9.9.9.9"
+- `pivpn_dns2`: for example "149.112.112.112"
+- `pivpn_host`: ip address of the host
+- `pivpn_net`: ip address range for the users of the vpn
+
+
 ## Project Structure
 
 - `roles/` - Contains all roles used by the playbooks

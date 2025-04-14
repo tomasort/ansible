@@ -3,7 +3,6 @@
 home: "{{ lookup('env', 'HOME') }}"
 user: "{{ lookup('env', 'USER') }}"
 path: "{{ lookup('env', 'PATH') }}"
-email: "tomasort@gmail.com"
 git_name: "tomasort"
 key: ".ssh/id_ed25519"
 
