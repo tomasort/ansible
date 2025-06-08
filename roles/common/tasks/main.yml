@@ -86,7 +86,7 @@
 
 - name: Include nvim tasks
   ansible.builtin.import_tasks: "nvim.yml"
-  tags: [nvim, minimal, vim]
+  tags: [nvim, minimal, vim, dotfiles]
 
 - name: Include zsh tasks
   ansible.builtin.import_tasks: "zsh.yml"
