@@ -1,10 +1,10 @@
 # TODO: figure out how to install only the necessary apps and then install the rest later. We will need to eighter run the role twice with different variables or simply create other tasks for installing the apps with homebrew, since it is isntalled with the role. 
-- hosts: macos
+- hosts: localhost
   tags: macos 
+  become: false  # Default to no sudo for macos
   roles:
     - macos
     - common
-    - geerlingguy.certbot
     - role: geerlingguy.mac.homebrew
       vars:
         mas_uninstalled_apps: []
