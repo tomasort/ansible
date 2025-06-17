@@ -127,7 +127,7 @@
 
 - name: Include tmux tasks
   ansible.builtin.import_tasks: "tmux.yml"
-  tags: [tmux, minimal]
+  tags: [tmux, minimal, dotfiles]
 
 - name: Include node tasks
   ansible.builtin.import_tasks: "node.yml"
