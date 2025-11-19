@@ -117,3 +117,13 @@ In `roles/raspberrypi/vars/main/vault.yml` we have variables for the VPN
 - `odroid.yml` - Playbook for Odroid configuration
 - `pi.yml` - Playbook for Raspberry Pi configuration
 - `encrypted.txt` - List of encrypted files
+
+
+# TODOs
+- Install slim
+    * we can use brew or use some other method that works in linux and macos. 
+    * [github repo](https://github.com/slimtoolkit/slim?tab=readme-ov-file)
+- Install dive
+    * [github repo](https://github.com/wagoodman/dive)
+- Install SDKMan
+    * [githug repo](https://github.com/sdkman/sdkman-cli)
