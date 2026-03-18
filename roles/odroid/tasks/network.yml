@@ -45,6 +45,48 @@
     enabled: true
   tags: [wifi]
 
+- name: Disable WiFi power save in NetworkManager
+  ansible.builtin.copy:
+    dest: /etc/NetworkManager/conf.d/default-wifi-powersave-on.conf
+    content: |
+      [connection]
+      wifi.powersave = 2
+    owner: root
+    group: root
+    mode: "0644"
+  become: true
+  notify: restart NetworkManager
+  tags: [wifi]
+
+- name: Disable USB autosuspend for TP-Link WiFi adapter
+  ansible.builtin.copy:
+    dest: /etc/udev/rules.d/60-wifi-no-autosuspend.rules
+    content: |
+      # Disable USB autosuspend for TP-Link Archer T2U PLUS [RTL8821AU] WiFi adapter
+      ACTION=="add", SUBSYSTEM=="usb", ATTR{idVendor}=="2357", ATTR{idProduct}=="0120", ATTR{power/autosuspend}="-1", ATTR{power/control}="on"
+    owner: root
+    group: root
+    mode: "0644"
+  become: true
+  notify: reload udev rules
+  tags: [wifi]
+
+- name: Prevent systemd-networkd from managing wlan0
+  ansible.builtin.copy:
+    dest: /etc/systemd/network/10-wlan0-unmanaged.network
+    content: |
+      [Match]
+      Name=wlan0
+
+      [Link]
+      Unmanaged=yes
+    owner: root
+    group: root
+    mode: "0644"
+  become: true
+  notify: restart systemd-networkd
+  tags: [wifi]
+
 - name: Check wlan0 status
   ansible.builtin.command: "ip link show wlan0"
   register: wlan0_status
@@ -68,6 +110,8 @@
     conn_name: my-wifi
     ifname: wlan0
     ssid: "{{ TRNetwork.wifi_name }}"
+    wifi:
+      bssid: "{{ wifi_bssid }}"
     wifi_sec:
       key-mgmt: wpa-psk
       psk: "{{ TRNetwork.wifi_password }}"
