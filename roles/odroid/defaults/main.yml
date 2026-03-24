@@ -2,4 +2,4 @@ dist_update: false
 package_upgrade: false
 gpio_ir_pin: 15 # pin used for IR emitter 
 gpiochip: gpiochip0
-wifi_bssid: "E4:19:7F:3F:CA:06"
+wifi_band: "a"  # 5GHz band preference

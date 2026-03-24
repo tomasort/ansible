@@ -80,6 +80,8 @@
 
       [Link]
       Unmanaged=yes
+      RequiredForOnline=no
+      ActivationPolicy=manual
     owner: root
     group: root
     mode: "0644"
@@ -110,14 +112,21 @@
     conn_name: my-wifi
     ifname: wlan0
     ssid: "{{ TRNetwork.wifi_name }}"
-    wifi:
-      bssid: "{{ wifi_bssid }}"
     wifi_sec:
       key-mgmt: wpa-psk
       psk: "{{ TRNetwork.wifi_password }}"
     state: present
     autoconnect: true
   become: true
+  tags: [wifi]
+
+- name: Set WiFi band preference to 5GHz
+  ansible.builtin.command: >
+    nmcli connection modify my-wifi
+    802-11-wireless.band {{ wifi_band }}
+    802-11-wireless.bssid ""
+  become: true
+  changed_when: true
   tags: [wifi]
 
 - name: Ensure WiFi connection is active
@@ -135,4 +144,50 @@
 - name: Display WiFi status
   debug:
     var: wifi_status.stdout_lines
+  tags: [wifi]
+
+- name: Deploy WiFi keepalive service
+  ansible.builtin.copy:
+    dest: /etc/systemd/system/wifi-keepalive.service
+    content: |
+      [Unit]
+      Description=WiFi keepalive ping
+      After=NetworkManager.service
+      Wants=NetworkManager.service
+
+      [Service]
+      Type=oneshot
+      ExecStart=/bin/ping -c 1 -W 2 -I wlan0 192.168.4.1
+    owner: root
+    group: root
+    mode: "0644"
+  become: true
+  tags: [wifi]
+
+- name: Deploy WiFi keepalive timer
+  ansible.builtin.copy:
+    dest: /etc/systemd/system/wifi-keepalive.timer
+    content: |
+      [Unit]
+      Description=Ping gateway every 30s to prevent WiFi inactivity disconnect
+
+      [Timer]
+      OnBootSec=60
+      OnUnitActiveSec=30
+
+      [Install]
+      WantedBy=timers.target
+    owner: root
+    group: root
+    mode: "0644"
+  become: true
+  tags: [wifi]
+
+- name: Enable and start WiFi keepalive timer
+  ansible.builtin.systemd:
+    name: wifi-keepalive.timer
+    state: started
+    enabled: true
+    daemon_reload: true
+  become: true
   tags: [wifi]
