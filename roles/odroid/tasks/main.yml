@@ -21,3 +21,33 @@
 - name: Include gpio configuration tasks
   import_tasks: "gpio.yml"
   tags: [gpio]
+
+- name: Deploy LED-off service to disable heartbeat LED
+  ansible.builtin.copy:
+    dest: /etc/systemd/system/led-off.service
+    content: |
+      [Unit]
+      Description=Turn off Odroid N2+ heartbeat LED
+      After=sysinit.target
+
+      [Service]
+      Type=oneshot
+      ExecStart=/bin/sh -c "echo none > /sys/class/leds/n2:blue/trigger && echo 0 > /sys/class/leds/n2:blue/brightness"
+      RemainAfterExit=yes
+
+      [Install]
+      WantedBy=multi-user.target
+    owner: root
+    group: root
+    mode: "0644"
+  become: true
+  tags: [led]
+
+- name: Enable LED-off service
+  ansible.builtin.systemd:
+    name: led-off.service
+    enabled: true
+    state: started
+    daemon_reload: true
+  become: true
+  tags: [led]

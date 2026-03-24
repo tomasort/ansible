@@ -58,15 +58,10 @@
   notify: restart NetworkManager
   tags: [wifi]
 
-- name: Disable USB autosuspend for TP-Link WiFi adapter
-  ansible.builtin.copy:
-    dest: /etc/udev/rules.d/60-wifi-no-autosuspend.rules
-    content: |
-      # Disable USB autosuspend for TP-Link Archer T2U PLUS [RTL8821AU] WiFi adapter
-      ACTION=="add", SUBSYSTEM=="usb", ATTR{idVendor}=="2357", ATTR{idProduct}=="0120", ATTR{power/autosuspend}="-1", ATTR{power/control}="on"
-    owner: root
-    group: root
-    mode: "0644"
+- name: Remove USB autosuspend rule if present
+  ansible.builtin.file:
+    path: /etc/udev/rules.d/60-wifi-no-autosuspend.rules
+    state: absent
   become: true
   notify: reload udev rules
   tags: [wifi]
