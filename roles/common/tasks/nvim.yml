@@ -1,10 +1,17 @@
 ---
 # Tasks to install neovim
+
+- name: Check if nvim is already installed
+  ansible.builtin.stat:
+    path: /usr/local/bin/nvim
+  register: nvim_installed
+
 - name: Clone Neovim stable branch
   ansible.builtin.git:
     repo: "https://github.com/neovim/neovim.git"
     dest: "/tmp/neovim"
     version: stable
+  when: not nvim_installed.stat.exists
 
 - name: Install nvim build dependencies
   ansible.builtin.package:
@@ -17,18 +24,21 @@
     - cmake
     - curl
     - build-essential
+  when: not nvim_installed.stat.exists
 
 - name: Build nvim
   community.general.make:
     chdir: /tmp/neovim
     params:
       CMAKE_BUILD_TYPE: RelWithDebInfo
+  when: not nvim_installed.stat.exists
 
 - name: Install nvim
   become: true
   community.general.make:
     chdir: /tmp/neovim
     target: install
+  when: not nvim_installed.stat.exists
 
 - debug: 
     msg: "The home directory is: {{ home }}"
@@ -38,6 +48,7 @@
     path: "{{ [home, '.local/share/nvim/site/autoload'] | path_join }}"
     state: directory
     mode: '0755'
+  become:  true
 
 - name: Download vim-plug
   ansible.builtin.get_url:
@@ -49,3 +60,5 @@
 - name: Install Vim plugins via vim-plug
   ansible.builtin.command:
     cmd: nvim --headless +PlugInstall +qall
+
+# TODO: set the variable GITHUB_COPILOT_TOKEN or GH_COPILOT_TOKEN in the environment to the github token

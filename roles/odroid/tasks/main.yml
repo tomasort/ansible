@@ -22,6 +22,10 @@
   import_tasks: "gpio.yml"
   tags: [gpio]
 
+- name: Include hostname configuration tasks
+  import_tasks: "hostname.yml"
+  tags: [hostname]
+
 - name: Deploy LED-off service to disable heartbeat LED
   ansible.builtin.copy:
     dest: /etc/systemd/system/led-off.service

@@ -38,4 +38,4 @@
     src: "/tmp/pivpnwgbackup.tgz"
     dest: "/"
     remote_src: yes
-  become: yes  # This is equivalent to using sudo
+  become: yes
