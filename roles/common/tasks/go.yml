@@ -46,14 +46,7 @@
     PATH: "/usr/local/go/bin:{{ path }}"
 
 # Packages that require go
-- name: Download cheat
-  ansible.builtin.git:
-    repo: "github.com/cheat/cheat/cmd/cheat@latest"
-    dest: "/tmp/cheat"
-
-- name: Install cheat
-  ansible.builtin.command: go install
-  args:
-    chdir: /tmp/cheat
+- name: Install cheat using go install
+  ansible.builtin.command: /usr/local/go/bin/go install github.com/cheat/cheat/cmd/cheat@latest
   environment:
     PATH: "/usr/local/go/bin:{{ path }}"
