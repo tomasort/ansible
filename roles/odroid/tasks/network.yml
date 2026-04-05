@@ -58,31 +58,31 @@
   notify: restart NetworkManager
   tags: [wifi]
 
-- name: Remove USB autosuspend rule if present
-  ansible.builtin.file:
-    path: /etc/udev/rules.d/60-wifi-no-autosuspend.rules
-    state: absent
-  become: true
-  notify: reload udev rules
-  tags: [wifi]
+# - name: Remove USB autosuspend rule if present
+#   ansible.builtin.file:
+#     path: /etc/udev/rules.d/60-wifi-no-autosuspend.rules
+#     state: absent
+#   become: true
+#   notify: reload udev rules
+#   tags: [wifi]
 
-- name: Prevent systemd-networkd from managing wlan0
-  ansible.builtin.copy:
-    dest: /etc/systemd/network/10-wlan0-unmanaged.network
-    content: |
-      [Match]
-      Name=wlan0
+# - name: Prevent systemd-networkd from managing wlan0
+#   ansible.builtin.copy:
+#     dest: /etc/systemd/network/10-wlan0-unmanaged.network
+#     content: |
+#       [Match]
+#       Name=wlan0
 
-      [Link]
-      Unmanaged=yes
-      RequiredForOnline=no
-      ActivationPolicy=manual
-    owner: root
-    group: root
-    mode: "0644"
-  become: true
-  notify: restart systemd-networkd
-  tags: [wifi]
+#       [Link]
+#       Unmanaged=yes
+#       RequiredForOnline=no
+#       ActivationPolicy=manual
+#     owner: root
+#     group: root
+#     mode: "0644"
+#   become: true
+#   notify: restart systemd-networkd
+#   tags: [wifi]
 
 - name: Check wlan0 status
   ansible.builtin.command: "ip link show wlan0"
