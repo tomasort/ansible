@@ -25,22 +25,33 @@
   when: ansible_os_family != 'Darwin'
   tags: [swap, yazi]
 
+- name: Check if yazi is already installed
+  ansible.builtin.stat:
+    path: /usr/local/bin/yazi
+  register: yazi_installed
+
 - name: Clone Yazi repository
   ansible.builtin.git:
     repo: https://github.com/sxyazi/yazi.git
-    dest: /tmp/yazi
+    dest: /opt/yazi-src
     update: yes
+  become: true
+  when: not yazi_installed.stat.exists
 
 - name: Build Yazi from source
   ansible.builtin.command: cargo build --release --locked
   args:
-    chdir: /tmp/yazi
+    chdir: /opt/yazi-src
   environment:
     PATH: "{{ home }}/.cargo/bin:{{ path }}"
+    # Limit parallelism to avoid OOM on low-RAM devices like Odroid/Pi
+    CARGO_BUILD_JOBS: "2"
+    RUSTFLAGS: "-C link-arg=-fuse-ld=lld"
+  when: not yazi_installed.stat.exists
 
 - name: Copy Yazi binaries to /usr/local/bin
   ansible.builtin.copy:
-    src: "/tmp/yazi/target/release/{{ item }}"
+    src: "/opt/yazi-src/target/release/{{ item }}"
     dest: "/usr/local/bin/{{ item }}"
     mode: "0755"
     remote_src: yes
@@ -48,6 +59,7 @@
     - yazi
     - ya
   become: true
+  when: not yazi_installed.stat.exists
 
 - name: Install navi if not installed
   community.general.cargo:
