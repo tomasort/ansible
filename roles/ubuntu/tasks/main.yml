@@ -29,7 +29,7 @@
 #   tags: [speedtest]
 
 - name: Install pyopenssl python package
-  ansible.builtin.pip:
-    name: pyopenssl
-    extra_args: --break-system-packages
+  ansible.builtin.package:
+    name: python3-openssl
+    state: present
   become: true
