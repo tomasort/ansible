@@ -3,3 +3,4 @@ password.txt
 vault.txt
 *.un~
 .env*
+.vscode/
