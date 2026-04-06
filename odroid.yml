@@ -4,11 +4,11 @@
     dist_update: false
     package_upgrade: false
   roles:
-    - common
     - role: ubuntu
       vars:
         nerd_font: FiraCode
       tags: [ubuntu]
+    - common
     - role: geerlingguy.docker
       become: true
       vars:

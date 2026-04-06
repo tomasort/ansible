@@ -20,6 +20,11 @@
   shell: /tmp/sh.rustup.rs -y
   when: cargo_exists is failed
 
+- name: Ensure swap is enabled before building Yazi
+  ansible.builtin.include_tasks: "../../ubuntu/tasks/swap.yml"
+  when: ansible_os_family != 'Darwin'
+  tags: [swap, yazi]
+
 - name: Clone Yazi repository
   ansible.builtin.git:
     repo: https://github.com/sxyazi/yazi.git
