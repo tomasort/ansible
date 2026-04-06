@@ -45,7 +45,6 @@
     PATH: "{{ home }}/.cargo/bin:{{ path }}"
     # Limit parallelism to avoid OOM on low-RAM devices like Odroid/Pi
     CARGO_BUILD_JOBS: "2"
-    RUSTFLAGS: "-C link-arg=-fuse-ld=lld"
   when: not yazi_installed.stat.exists
 
 - name: Copy Yazi binaries to /usr/local/bin
