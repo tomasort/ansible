@@ -1,93 +1,176 @@
 ---
-- name: Check if swap is turned on
-  shell: free | awk '/^Swap:/ {if ($2 > 0) exit 0; else exit 1}'
-  register: swap_active
-  ignore_errors: true
-  changed_when: false
-
-- name: Set should_disable
-  set_fact:
-    should_disable: "{{ swap_active.rc != 0 }}"
-
-- debug: 
-    msg: "The flag for disabling and rebuilding the swap file is: {{ should_disable }}"
-
-- name: Disable existing swap
-  become: true
-  command: swapoff -a
-  register: swapoff_result
-  retries: 3
-  delay: 5
-  until: swapoff_result is success
-  when: should_disable
-  ignore_errors: true
-
-- name: Wait for swap to be fully disabled
-  command: grep -v /swapfile /proc/swaps
-  register: swap_disabled
-  retries: 3
-  delay: 5
-  until: swap_disabled.rc == 0
-  when: should_disable
-
-- name: Remove old swap file
-  become: true
-  file:
-    path: /swapfile
-    state: absent
-  register: result
-  when: should_disable
-
-- name: Allocate the swap file using dd
-  become: true
-  command: dd if=/dev/zero of=/swapfile bs=1MB count={{ swap.size_gb * 1024 }}
-
-- name: Change permission of the swap file
-  become: true
-  file:
-    path: /swapfile
-    mode: "0600"
-
-- name: Create a swap area on the swap file
-  become: true
-  command: mkswap /swapfile
-
-- name: Activate the swap file as a swap memory
-  become: true
-  command: swapon /swapfile
-
-- name: Append configuration in /etc/fstab
-  become: true
-  lineinfile:
-    path: /etc/fstab
-    line: "/swapfile swap swap defaults 0 0"
-    create: yes
-
-- name: Set swappiness level
-  become: true
-  command: sysctl vm.swappiness={{ swap.swappiness }}
-
-- name: Append configuration in /etc/sysctl.conf
-  become: true
-  lineinfile:
-    path: /etc/sysctl.conf
-    line: "vm.swappiness={{ swap.swappiness }}"
-    create: yes
+# Swap file setup with proper detection and idempotency
 
 - name: Check if swap file exists
   stat:
     path: /swapfile
-  register: swapfile_exists
+  register: swapfile_stat
+  changed_when: false
+  tags: [swap]
 
-- name: Verify swap is active
-  shell: swapon --show | grep -q '^/swapfile'
+- name: Check if swap is currently active
+  shell: free | awk '/^Swap:/ {if ($2 > 0) exit 0; else exit 1}'
   register: swap_active
   ignore_errors: true
-  become: true
+  changed_when: false
+  tags: [swap]
 
-- name: Assert swap file is properly configured
-  assert:
-    that:
-      - swapfile_exists.stat.exists
-      - swap_active is success
-    fail_msg: "Swap file verification failed. Exists: {{ swapfile_exists.stat.exists }}, Active: {{ swap_active is success }}"
+- name: Check if /swapfile is active in swapon
+  shell: swapon --show | grep -q '^/swapfile' || exit 1
+  register: swapfile_active
+  ignore_errors: true
+  changed_when: false
+  failed_when: false
+  become: true
+  tags: [swap]
+
+- name: Set swap configuration facts
+  set_fact:
+    swapfile_exists: "{{ swapfile_stat.stat.exists }}"
+    swap_is_active: "{{ swap_active.rc == 0 }}"
+    swapfile_in_use: "{{ swapfile_active.rc == 0 }}"
+    should_recreate_swap: "{{ not swapfile_stat.stat.exists or (swapfile_stat.stat.exists and swapfile_active.rc != 0) }}"
+  tags: [swap]
+
+- name: Display swap status
+  debug:
+    msg: |
+      Swap file status:
+      - Swap file exists: {{ swapfile_exists }}
+      - Swap is active (total): {{ swap_is_active }}
+      - Swap file is in use: {{ swapfile_in_use }}
+      - Should recreate swap: {{ should_recreate_swap }}
+  tags: [swap]
+
+- name: Disable and remove existing swap if needed
+  block:
+    - name: Disable all swap
+      become: true
+      command: swapoff -a
+      register: swapoff_result
+      retries: 3
+      delay: 5
+      until: swapoff_result is success
+      ignore_errors: true
+      tags: [swap]
+
+    - name: Wait for swap to be fully disabled
+      shell: sleep 2 && grep -c /swapfile /proc/swaps || true
+      register: swap_check
+      until: swap_check.stdout | int == 0
+      retries: 5
+      delay: 2
+      changed_when: false
+      tags: [swap]
+
+    - name: Remove old swap file
+      become: true
+      file:
+        path: /swapfile
+        state: absent
+      tags: [swap]
+
+  when: should_recreate_swap and swapfile_exists
+  tags: [swap]
+
+- name: Create new swap file
+  block:
+    - name: Allocate the swap file using dd
+      become: true
+      command: dd if=/dev/zero of=/swapfile bs=1MB count={{ swap.size_gb * 1024 }}
+      register: dd_result
+      tags: [swap]
+
+    - name: Verify swap file was created
+      stat:
+        path: /swapfile
+      register: swapfile_created
+      failed_when: not swapfile_created.stat.exists
+      tags: [swap]
+
+    - name: Change permission of the swap file
+      become: true
+      file:
+        path: /swapfile
+        mode: "0600"
+      tags: [swap]
+
+    - name: Create a swap area on the swap file
+      become: true
+      command: mkswap /swapfile
+      tags: [swap]
+
+    - name: Activate the swap file as a swap memory
+      become: true
+      command: swapon /swapfile
+      register: swapon_result
+      tags: [swap]
+
+  when: should_recreate_swap
+  tags: [swap]
+
+- name: Ensure /swapfile is in /etc/fstab
+  become: true
+  lineinfile:
+    path: /etc/fstab
+    line: "/swapfile swap swap defaults 0 0"
+    regexp: '^/swapfile'
+    state: present
+    create: yes
+  tags: [swap]
+
+- name: Set swappiness level
+  become: true
+  sysctl:
+    name: vm.swappiness
+    value: "{{ swap.swappiness }}"
+    sysctl_set: yes
+    state: present
+  tags: [swap]
+
+- name: Verify final swap configuration
+  block:
+    - name: Check if swap file exists (final check)
+      stat:
+        path: /swapfile
+      register: final_swapfile_check
+      tags: [swap]
+
+    - name: Verify swap file is active
+      shell: swapon --show | grep -q '^/swapfile'
+      register: final_swap_active
+      ignore_errors: true
+      become: true
+      changed_when: false
+      tags: [swap]
+
+    - name: Display final swap status
+      debug:
+        msg: |
+          Swap configuration complete:
+          - Swap file exists: {{ final_swapfile_check.stat.exists }}
+          - Swap file is active: {{ final_swap_active.rc == 0 }}
+          - Swap size: {{ swap.size_gb }} GB
+          - Swappiness: {{ swap.swappiness }}
+      tags: [swap]
+
+    - name: Assert swap file is properly configured
+      assert:
+        that:
+          - final_swapfile_check.stat.exists
+          - final_swap_active.rc == 0
+        fail_msg: |
+          Swap file verification failed.
+          - File exists: {{ final_swapfile_check.stat.exists }}
+          - Swap active: {{ final_swap_active.rc == 0 }}
+          Run: sudo swapon --show && sudo free -h
+      tags: [swap]
+
+  when: should_recreate_swap
+  tags: [swap]
+
+- name: Display swap skip message
+  debug:
+    msg: "Swap file already configured and active. Skipping recreation."
+  when: not should_recreate_swap
+  tags: [swap]

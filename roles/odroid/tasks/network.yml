@@ -50,7 +50,7 @@
       package:
         name:
           - build-essential
-          - linux-headers-{{ ansible_kernel | regex_replace('-.*', '') }}
+          - linux-headers-{{ ansible_kernel }}
           - git
         state: present
       become: true
@@ -170,6 +170,7 @@
     name: NetworkManager
     state: started
     enabled: true
+  become: true
   tags: [wifi]
 
 - name: Disable WiFi power save in NetworkManager
@@ -182,7 +183,7 @@
     group: root
     mode: "0644"
   become: true
-  notify: restart NetworkManager
+  notify: reload NetworkManager configuration
   tags: [wifi]
 
 # - name: Remove USB autosuspend rule if present
@@ -251,10 +252,19 @@
   changed_when: true
   tags: [wifi]
 
-- name: Ensure WiFi connection is active
+- name: Get currently active WiFi SSID
+  ansible.builtin.shell: "nmcli -t -f active,ssid dev wifi | grep '^yes:' | cut -d: -f2"
+  register: active_wifi_ssid
+  changed_when: false
+  failed_when: false
+  become: true
+  tags: [wifi]
+
+- name: Ensure WiFi connection is active (only if not already on target SSID)
   command: nmcli connection up my-wifi
   become: true
   ignore_errors: true
+  when: active_wifi_ssid.stdout != TRNetwork.wifi_name
   tags: [wifi]
 
 - name: Check WiFi connection status

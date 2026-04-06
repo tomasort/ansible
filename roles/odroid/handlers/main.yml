@@ -1,8 +1,6 @@
 ---
-- name: restart NetworkManager
-  ansible.builtin.systemd:
-    name: NetworkManager
-    state: restarted
+- name: reload NetworkManager configuration
+  ansible.builtin.command: nmcli connection reload
   become: true
 
 - name: reload udev rules

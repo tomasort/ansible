@@ -2,3 +2,4 @@ become.txt
 password.txt
 vault.txt
 *.un~
+.env*

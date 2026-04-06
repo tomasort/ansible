@@ -1,12 +1,38 @@
+- name: Wait for any pending apt operations to complete
+  shell: |
+    i=0
+    while [ "$i" -lt 30 ]; do
+      i=$((i + 1))
+      if ! fuser /var/lib/apt/lists/lock /var/cache/apt/archives/lock /var/lib/dpkg/lock /var/lib/dpkg/lock-frontend >/dev/null 2>&1; then
+        echo "APT ready"
+        exit 0
+      fi
+      echo "Waiting for APT lock ($i/30)..."
+      sleep 2
+    done
+    echo "Timeout waiting for APT lock"
+    exit 1
+  register: apt_wait
+  changed_when: false
+  tags: [hostname, packages]
+
 - name: Install Avahi daemon
   apt:
     name: avahi-daemon
     state: present
     update_cache: yes
+  become: true
+  retries: 3
+  delay: 5
+  until: result is success
+  register: result
+  tags: [hostname, packages]
 
 - name: Set system hostname
   hostname:
     name: "{{ new_hostname }}"
+  become: true
+  tags: [hostname]
   
 - name: Update /etc/hosts file
   lineinfile:
@@ -14,15 +40,20 @@
     regexp: '^127\.0\.1\.1'
     line: "127.0.1.1       {{ new_hostname }}"
     state: present
+  become: true
+  tags: [hostname]
   
 - name: Restart Avahi daemon
   service:
     name: avahi-daemon
     state: restarted
     enabled: yes
+  become: true
+  tags: [hostname, services]
   
-- name: Restart networking service
-  service:
-    name: networking
-    state: restarted
-  ignore_errors: yes  # Some systems might use different networking services
+- name: Verify hostname resolution works
+  ansible.builtin.command: hostname -f
+  changed_when: false
+  failed_when: false
+  become: true
+  tags: [hostname, services]
