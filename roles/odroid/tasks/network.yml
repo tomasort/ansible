@@ -21,6 +21,13 @@
       args:
         chdir: "/tmp/rtl8812au"
       become: true
+      register: driver_build
+      ignore_errors: true
+
+    - name: Display driver build warning if failed
+      ansible.builtin.debug:
+        msg: "WARNING: RTL8812AU driver build failed. WiFi may not work optimally. Check /var/lib/dkms/8812au/*/build/make.log for details."
+      when: driver_build.rc != 0
 
     - name: Load the Wi-Fi driver module
       modprobe:
@@ -28,6 +35,7 @@
         state: present
         persistent: present
       become: true
+      when: driver_build.rc == 0
   when: rtl88XXau_module_check.rc != 0
   tags: [drivers, wifi]
 
