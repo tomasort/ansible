@@ -3,6 +3,12 @@
   tags: macos 
   gather_facts: true
   become: false  # Default to no sudo for macos
+  
+  pre_tasks:
+    - name: Ensure facts are gathered
+      ansible.builtin.setup:
+      tags: always
+  
   roles:
     - macos
     - common

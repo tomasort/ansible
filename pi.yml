@@ -1,6 +1,12 @@
 - hosts: localhost 
   tags: pi 
   gather_facts: true
+  
+  pre_tasks:
+    - name: Ensure facts are gathered
+      ansible.builtin.setup:
+      tags: always
+  
   roles:
     - common
     - role: ubuntu

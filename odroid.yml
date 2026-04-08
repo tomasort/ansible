@@ -4,6 +4,12 @@
   vars:
     dist_update: false
     package_upgrade: false
+  
+  pre_tasks:
+    - name: Ensure facts are gathered
+      ansible.builtin.setup:
+      tags: always
+  
   roles:
     - role: ubuntu
       vars:
