@@ -33,10 +33,16 @@
   become: true
 
 # Packages that require go
+- name: Check if duf is already installed
+  ansible.builtin.stat:
+    path: "{{ home }}/.local/bin/duf"
+  register: duf_installed
+
 - name: Download duf
   ansible.builtin.git:
     repo: "https://github.com/muesli/duf.git"
     dest: "/tmp/duf"
+  when: not duf_installed.stat.exists
     
 - name: Install duf
   ansible.builtin.command: go install
@@ -44,9 +50,35 @@
     chdir: /tmp/duf
   environment:
     PATH: "/usr/local/go/bin:{{ path }}"
+  when: not duf_installed.stat.exists
 
 # Packages that require go
+- name: Check if cheat is already installed
+  ansible.builtin.stat:
+    path: "{{ home }}/.local/bin/cheat"
+  register: cheat_installed
+
 - name: Install cheat using go install
   ansible.builtin.command: /usr/local/go/bin/go install github.com/cheat/cheat/cmd/cheat@latest
   environment:
     PATH: "/usr/local/go/bin:{{ path }}"
+  when: not cheat_installed.stat.exists
+
+- name: Ensure cheat config directory exists
+  ansible.builtin.file:
+    path: "{{ home }}/.config/cheat/cheatsheets"
+    state: directory
+    mode: '0755'
+    recurse: yes
+
+- name: Check if community cheatsheets already exist
+  ansible.builtin.stat:
+    path: "{{ home }}/.config/cheat/cheatsheets/community"
+  register: community_cheatsheets
+
+- name: Clone community cheatsheets for cheat
+  ansible.builtin.git:
+    repo: "https://github.com/cheat/cheatsheets.git"
+    dest: "{{ home }}/.config/cheat/cheatsheets/community"
+    update: yes
+  when: not community_cheatsheets.stat.exists or community_cheatsheets.stat.isdir
