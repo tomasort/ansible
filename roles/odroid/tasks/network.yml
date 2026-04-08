@@ -278,46 +278,138 @@
     var: wifi_status.stdout_lines
   tags: [wifi]
 
-- name: Deploy WiFi keepalive service
+- name: Disable RTL8821AU driver power management via modprobe
   ansible.builtin.copy:
-    dest: /etc/systemd/system/wifi-keepalive.service
+    dest: /etc/modprobe.d/8821au.conf
+    content: |
+      # Disable power management for RTL8821AU WiFi adapter to prevent
+      # DISASSOC_LOW_ACK (reason 34) disconnections from the router.
+      #   rtw_power_mgnt=0  - Disable firmware power management (was 2=MAX)
+      #   rtw_ips_mode=0    - Disable Inactive Power Save
+      #   rtw_enusbss=0     - Disable USB selective suspend in driver
+      options 8821au rtw_power_mgnt=0 rtw_ips_mode=0 rtw_enusbss=0
+    owner: root
+    group: root
+    mode: "0644"
+  become: true
+  tags: [wifi, drivers]
+
+- name: Disable USB autosuspend for TP-Link WiFi adapter
+  ansible.builtin.copy:
+    dest: /etc/udev/rules.d/60-wifi-no-autosuspend.rules
+    content: |
+      # Disable USB autosuspend for TP-Link Archer T2U PLUS (RTL8821AU)
+      ACTION=="add", SUBSYSTEM=="usb", ATTR{idVendor}=="2357", ATTR{idProduct}=="0120", ATTR{power/autosuspend}="-1", ATTR{power/control}="on"
+    owner: root
+    group: root
+    mode: "0644"
+  become: true
+  notify: reload udev rules
+  tags: [wifi, drivers]
+
+- name: Deploy WiFi watchdog script
+  ansible.builtin.copy:
+    dest: /usr/local/bin/wifi-watchdog.sh
+    content: |
+      #!/bin/bash
+      # WiFi watchdog: monitors connectivity and recovers from drops.
+      # Checks every 30s. After 3 consecutive failures, restarts WiFi.
+      # After 5 consecutive failures, reloads the USB WiFi adapter driver.
+
+      IFACE="wlan0"
+      GATEWAY="192.168.4.1"
+      FAIL_COUNT=0
+      MAX_SOFT_FAILURES=3
+      MAX_HARD_FAILURES=5
+      CHECK_INTERVAL=30
+
+      log() {
+          logger -t wifi-watchdog "$1"
+          echo "$(date): $1"
+      }
+
+      soft_restart() {
+          log "Soft restart: bringing WiFi connection back up"
+          nmcli device disconnect "$IFACE" 2>/dev/null
+          sleep 2
+          nmcli device connect "$IFACE" 2>/dev/null
+          sleep 5
+      }
+
+      hard_restart() {
+          log "Hard restart: reloading 8821au driver module"
+          nmcli device disconnect "$IFACE" 2>/dev/null
+          sleep 1
+          ip link set "$IFACE" down 2>/dev/null
+          sleep 1
+          modprobe -r 8821au 2>/dev/null
+          sleep 3
+          modprobe 8821au 2>/dev/null
+          sleep 5
+          nmcli device connect "$IFACE" 2>/dev/null
+          sleep 5
+      }
+
+      while true; do
+          if ping -c 1 -W 3 -I "$IFACE" "$GATEWAY" > /dev/null 2>&1; then
+              if [ $FAIL_COUNT -gt 0 ]; then
+                  log "Connectivity restored after $FAIL_COUNT failures"
+              fi
+              FAIL_COUNT=0
+          else
+              FAIL_COUNT=$((FAIL_COUNT + 1))
+              log "Ping failed ($FAIL_COUNT consecutive)"
+
+              if [ $FAIL_COUNT -ge $MAX_HARD_FAILURES ]; then
+                  hard_restart
+                  FAIL_COUNT=0
+              elif [ $FAIL_COUNT -ge $MAX_SOFT_FAILURES ]; then
+                  soft_restart
+              fi
+          fi
+          sleep $CHECK_INTERVAL
+      done
+    owner: root
+    group: root
+    mode: "0755"
+  become: true
+  tags: [wifi]
+
+- name: Deploy WiFi watchdog service
+  ansible.builtin.copy:
+    dest: /etc/systemd/system/wifi-watchdog.service
     content: |
       [Unit]
-      Description=WiFi keepalive ping
+      Description=WiFi watchdog - detect and recover from WiFi drops
       After=NetworkManager.service
       Wants=NetworkManager.service
 
       [Service]
-      Type=oneshot
-      ExecStart=/bin/ping -c 1 -W 2 -I wlan0 192.168.4.1
-    owner: root
-    group: root
-    mode: "0644"
-  become: true
-  tags: [wifi]
-
-- name: Deploy WiFi keepalive timer
-  ansible.builtin.copy:
-    dest: /etc/systemd/system/wifi-keepalive.timer
-    content: |
-      [Unit]
-      Description=Ping gateway every 30s to prevent WiFi inactivity disconnect
-
-      [Timer]
-      OnBootSec=60
-      OnUnitActiveSec=30
+      Type=simple
+      Restart=always
+      RestartSec=10
+      ExecStart=/usr/local/bin/wifi-watchdog.sh
 
       [Install]
-      WantedBy=timers.target
+      WantedBy=multi-user.target
     owner: root
     group: root
     mode: "0644"
   become: true
   tags: [wifi]
 
-- name: Enable and start WiFi keepalive timer
+- name: Disable old WiFi keepalive timer
   ansible.builtin.systemd:
     name: wifi-keepalive.timer
+    state: stopped
+    enabled: false
+  become: true
+  failed_when: false
+  tags: [wifi]
+
+- name: Enable and start WiFi watchdog service
+  ansible.builtin.systemd:
+    name: wifi-watchdog.service
     state: started
     enabled: true
     daemon_reload: true
