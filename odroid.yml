@@ -1,5 +1,6 @@
 - hosts: localhost
   tags: odroid
+  gather_facts: true
   vars:
     dist_update: false
     package_upgrade: false
