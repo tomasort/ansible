@@ -35,7 +35,7 @@
 # Packages that require go
 - name: Check if duf is already installed
   ansible.builtin.stat:
-    path: "{{ home }}/.local/bin/duf"
+    path: "{{ home }}/go/bin/duf"
   register: duf_installed
 
 - name: Download duf
@@ -55,7 +55,7 @@
 # Packages that require go
 - name: Check if cheat is already installed
   ansible.builtin.stat:
-    path: "{{ home }}/.local/bin/cheat"
+    path: "{{ home }}/go/bin/cheat"
   register: cheat_installed
 
 - name: Install cheat using go install

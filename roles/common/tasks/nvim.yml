@@ -2,16 +2,21 @@
 # Tasks to install neovim
 
 - name: Check if nvim is already installed
-  ansible.builtin.stat:
-    path: /usr/local/bin/nvim
+  ansible.builtin.command:
+    argv:
+      - sh
+      - -lc
+      - command -v nvim
   register: nvim_installed
+  changed_when: false
+  failed_when: false
 
 - name: Clone Neovim stable branch
   ansible.builtin.git:
     repo: "https://github.com/neovim/neovim.git"
     dest: "/tmp/neovim"
     version: stable
-  when: not nvim_installed.stat.exists
+  when: nvim_installed.rc != 0
 
 - name: Install nvim build dependencies
   ansible.builtin.package:
@@ -24,41 +29,63 @@
     - cmake
     - curl
     - build-essential
-  when: not nvim_installed.stat.exists
+  when: nvim_installed.rc != 0
 
 - name: Build nvim
   community.general.make:
     chdir: /tmp/neovim
     params:
       CMAKE_BUILD_TYPE: RelWithDebInfo
-  when: not nvim_installed.stat.exists
+  when: nvim_installed.rc != 0
 
 - name: Install nvim
   become: true
   community.general.make:
     chdir: /tmp/neovim
     target: install
-  when: not nvim_installed.stat.exists
+  when: nvim_installed.rc != 0
 
-- debug: 
-    msg: "The home directory is: {{ home }}"
+- name: Check for Neovim init.lua
+  ansible.builtin.stat:
+    path: "{{ [home, '.config/nvim/init.lua'] | path_join }}"
+  register: nvim_config
 
-- name: Ensure autoload directory exists
+- name: Fail if the Neovim config was not stowed
+  ansible.builtin.fail:
+    msg: "Expected {{ [home, '.config/nvim/init.lua'] | path_join }} to exist before bootstrapping plugins. Make sure the dotfiles task runs first."
+  when: not nvim_config.stat.exists
+
+- name: Remove legacy vim-plug bootstrap file
   ansible.builtin.file:
-    path: "{{ [home, '.local/share/nvim/site/autoload'] | path_join }}"
-    state: directory
-    mode: '0755'
-  become:  true
+    path: "{{ [home, '.local/share/nvim/site/autoload/plug.vim'] | path_join }}"
+    state: absent
 
-- name: Download vim-plug
-  ansible.builtin.get_url:
-    url: https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
-    dest: "{{ [home, '.local/share/nvim/site/autoload/plug.vim'] | path_join }}"
-    mode: '0644'
-  become:  true
-
-- name: Install Vim plugins via vim-plug
+- name: Bootstrap lazy.nvim plugins
   ansible.builtin.command:
-    cmd: nvim --headless +PlugInstall +qall
+    argv:
+      - nvim
+      - --headless
+      - -u
+      - "{{ [home, '.config/nvim/init.lua'] | path_join }}"
+      - +Lazy! sync
+      - +qall
+  environment:
+    HOME: "{{ home }}"
+  register: lazy_sync
+  changed_when: true
+
+- name: Install Mason-managed tools
+  ansible.builtin.command:
+    argv:
+      - nvim
+      - --headless
+      - -u
+      - "{{ [home, '.config/nvim/init.lua'] | path_join }}"
+      - +MasonToolsInstallSync
+      - +qall
+  environment:
+    HOME: "{{ home }}"
+  register: mason_tools
+  changed_when: true
 
 # TODO: set the variable GITHUB_COPILOT_TOKEN or GH_COPILOT_TOKEN in the environment to the github token
