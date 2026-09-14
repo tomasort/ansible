@@ -1,6 +1,7 @@
 become.txt
 password.txt
 vault.txt
+.ansible/
 *.un~
 .env*
 .vscode/

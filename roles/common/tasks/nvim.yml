@@ -89,3 +89,5 @@
   changed_when: true
 
 # TODO: set the variable GITHUB_COPILOT_TOKEN or GH_COPILOT_TOKEN in the environment to the github token
+
+# TODO: for the new version of neovim, install the treesitter cli (e.g. via MasonToolsInstallSync with tree-sitter-cli)
