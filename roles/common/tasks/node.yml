@@ -39,6 +39,7 @@
     - eslint
     - prettier
     - vite
+    - "@alibaba-group/open-code-review"
   become: true
 
 - name: Change ownership of the .npm directory dynamically

@@ -13,6 +13,11 @@
     name: font-hack-nerd-font
     state: present
 
+- name: Ensure opencode is installed
+  community.general.homebrew_cask:
+    name: opencode
+    state: present
+
 # Set the font
 # Look for "Normal Font" = "HackNFP-Regular 14";
 # then you can set it using defaults write. Read the man pages and see if we can "decompile" the plist and then recompile with the value we want. 

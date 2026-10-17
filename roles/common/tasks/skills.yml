@@ -1,0 +1,47 @@
+---
+# Third-party agent skills with their own update paths.
+# Tracked in the dotfiles repo: skills are symlinked by `stow .` in dotfiles.yml;
+# this file only restores the external sources they point at.
+
+# diagram-design skill = git submodule (externals/diagram-design)
+- name: Init dotfiles git submodules (diagram-design skill)
+  ansible.builtin.shell: "git submodule update --init externals/diagram-design"
+  args:
+    chdir: "{{ [home, 'dotfiles'] | path_join }}"
+    creates: "{{ [home, 'dotfiles', 'externals', 'diagram-design', 'skills', 'diagram-design', 'SKILL.md'] | path_join }}"
+  register: submodule_result
+  changed_when: 'submodule_result.stdout is search("Submodule")'
+  tags: [skills, dotfiles]
+
+# open-code-review opencode plugin = single tracked file (dotfiles/.config/opencode/plugins);
+# only its npm dependency needs provisioning (OpenCode 1.x).
+- name: Install OpenCodeReview opencode plugin dependency
+  community.general.npm:
+    name: "@opencode-ai/plugin"
+    path: "{{ [home, '.config', 'opencode'] | path_join }}"
+  register: ocr_plugin_deps
+  changed_when: false
+  tags: [skills, dotfiles]
+
+- name: Verify OpenCodeReview opencode plugin is stowed
+  ansible.builtin.stat:
+    path: "{{ home }}/.config/opencode/plugins/open-code-review.ts"
+  register: ocr_plugin_file
+  changed_when: false
+  tags: [skills, dotfiles]
+
+- name: Assert OpenCodeReview opencode plugin file exists
+  ansible.builtin.fail:
+    msg: 'open-code-review.ts missing at ~/.config/opencode/plugins - run stow . from the dotfiles repo'
+  when: not ocr_plugin_file.stat.exists
+  tags: [skills, dotfiles]
+
+# hyperframes skill family = npm-managed, installs to ~/.claude/skills and ~/.agents/skills
+# (to update later on a running machine: npx hyperframes skills update)
+- name: Install HyperFrames skills via its CLI
+  ansible.builtin.shell: "npx -y hyperframes@latest skills"
+  args:
+    creates: "{{ home }}/.claude/skills/hyperframes/SKILL.md"
+  register: hyperframes_result
+  changed_when: 'hyperframes_result.stdout is not search("current") and hyperframes_result.stdout is search("Install|install")'
+  tags: [skills, dotfiles]
