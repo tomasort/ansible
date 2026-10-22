@@ -64,7 +64,18 @@ You can customize the theme by overriding the `zsh_theme` variable in your playb
 
 ## Working with Encrypted Files
 
-This project uses `ansible-vault` to securely store sensitive information.
+This project uses `ansible-vault` to securely store sensitive information. The
+vault and sudo passwords come from `vault.txt` / `become.txt` (both
+git-ignored), so commands below never prompt.
+
+- `make list` — show which secret files are plaintext vs vault-encrypted
+- `make encrypt` — encrypt every secret file that is still plaintext
+- `make decrypt` — decrypt every vault-encrypted secret file
+- `make roles` — install galaxy roles/collections from `requirements.yml`
+- `make install` — full bootstrap (installs ansible itself + requirements, via `./install`)
+
+Encrypted candidates are discovered by content (`$ANSIBLE_VAULT` header),
+so there is no manifest to keep in sync.
 
 ### Viewing Encrypted Files
 

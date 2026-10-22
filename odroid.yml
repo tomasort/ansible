@@ -1,29 +1,13 @@
 - hosts: localhost
   tags: odroid
   gather_facts: true
-  vars:
-    dist_update: false
-    package_upgrade: false
-  
-  pre_tasks:
-    - name: Ensure facts are gathered
-      ansible.builtin.setup:
-      tags: always
-  
+  vars_files:
+    - vars/common.yml
+
   roles:
-    - role: ubuntu
-      vars:
-        nerd_font: FiraCode
-      tags: [ubuntu]
+    - linux
     - common
     - role: geerlingguy.docker
       become: true
-      vars:
-        docker_users:
-          - "{{ lookup('env', 'USER') }}"
-          - root
-        docker_install_compose: true
       tags: [docker]
-    - role: odroid
-      vars:
-        dist_update: false
+    - odroid

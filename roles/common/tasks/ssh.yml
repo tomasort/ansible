@@ -1,7 +1,7 @@
 - name: Ensure .ssh directory exists.
   file:
     dest: "{{ [home, '.ssh'] | path_join }}"
-    mode: 0775
+    mode: 0750
     state: directory
 
 - name: Install ssh key
@@ -21,4 +21,22 @@
     user: "{{ user }}"
     state: present
     key: "{{ lookup('file', [home, key + '.pub'] | path_join) }}"
-  with_fileglob: "{{ home }}/.ssh/*.pub"
+
+- name: Ensure X11 forwarding is enabled on the client side
+  ansible.builtin.lineinfile:
+    path: /etc/ssh/ssh_config
+    regexp: '^#?ForwardX11'
+    insertafter: 'Host *'
+    line: 'ForwardX11 yes'
+    firstmatch: true
+  become: true
+
+- name: Ensure X11 forwarding is disabled for github.com
+  ansible.builtin.blockinfile:
+    path: /etc/ssh/ssh_config
+    marker: "# {mark} ANSIBLE MANAGED BLOCK - GITHUB X11"
+    block: |
+      Host github.com
+        ForwardX11 no
+    insertbefore: '^Host \*'
+  become: true

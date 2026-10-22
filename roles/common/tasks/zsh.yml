@@ -3,22 +3,9 @@
   package:
     name: zsh
     state: present
-  become: true
+  become: "{{ ansible_os_family != 'Darwin' }}"
 
-- name: Ensure ruby is installed (for colorls).
-  package:
-    name:
-      - ruby
-      - ruby-dev
-      - ruby-colorize
-    state: present
-  become: true
-
-- name: Install colorls
-  community.general.gem:
-    name: colorls
-    state: present
-  become: true
+# colorls lives in colorls.yml — un-zsh-paired, installed on every platform.
 
 - name: Check current shell
   shell: echo $SHELL
@@ -29,7 +16,7 @@
   shell: chsh -s $(which zsh) "{{ user }}"
   args:
     executable: /bin/bash
-  become: true
+  become: true  # chsh needs root on both platforms
   when: "'zsh' not in shell.stdout"
 
 - debug:
@@ -41,7 +28,7 @@
     url: https://raw.github.com/robbyrussell/oh-my-zsh/master/tools/install.sh
     dest: /tmp/install_oh_my_zsh.sh
     mode: '0755'
-  become: true
+  become: "{{ ansible_os_family != 'Darwin' }}"
 
 - name: Run oh-my-zsh installation script
   shell: sh /tmp/install_oh_my_zsh.sh --unattended
@@ -82,6 +69,13 @@
 
 - debug:
     msg: "Using the zsh theme {{ zsh_theme }}"
+
+# .zshrc.local holds machine secrets (API keys read by opencode/nvim/minuet).
+- name: Render private .zshrc.local into the dotfiles tree
+  ansible.builtin.template:
+    src: .zshrc.local.j2
+    dest: "{{ [home, '.zshrc.local'] | path_join }}"
+    mode: '0600'
 
 # - name: Create .zshr
 #   ansible.builtin.template:

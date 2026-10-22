@@ -3,7 +3,7 @@
   package:
     name: git
     state: present
-  become: true
+  become: "{{ ansible_os_family != 'Darwin' }}"
 
 - name: Git personal setup email
   community.general.git_config:
@@ -34,20 +34,10 @@
   package:
     name: gh
     state: present
-  become: true
+  become: "{{ ansible_os_family != 'Darwin' }}"
 
 - name: Authenticate on Github
+  # token via stdin — keeps it out of argv/process listings
   ansible.builtin.shell:
-    cmd: echo {{ github_token }} | gh auth login --git-protocol ssh --with-token
-
-- name: Download lazygit
-  ansible.builtin.git:
-    repo: "https://github.com/jesseduffield/lazygit.git"
-    dest: /tmp/lazygit
-
-- name: Install lazygit
-  ansible.builtin.command: go install
-  args:
-    chdir: /tmp/lazygit
-  environment:
-    PATH: "/usr/local/go/bin:{{ path }}"
+    cmd: gh auth login --git-protocol ssh --with-token
+    stdin: "{{ github_token }}"

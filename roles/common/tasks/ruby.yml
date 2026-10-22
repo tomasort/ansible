@@ -1,0 +1,21 @@
+---
+# Ruby toolchain — installed per platform (apt on Linux, brew on macOS).
+# Ruby-gem-based tools (colorls, ...) live in their own task files.
+- name: Ensure ruby is installed (apt names, Linux)
+  package:
+    name:
+      - ruby
+      - ruby-dev
+      - ruby-colorize
+    state: present
+  become: "{{ ansible_os_family != 'Darwin' }}"
+  when: ansible_os_family != 'Darwin'
+  tags: [ruby]
+
+- name: Ensure ruby is installed (brew, macOS)
+  package:
+    name: ruby
+    state: present
+  become: "{{ ansible_os_family != 'Darwin' }}"
+  when: ansible_os_family == 'Darwin'
+  tags: [ruby]

@@ -1,0 +1,58 @@
+---
+# tasks file for linux — distro-neutral tasks valid on any Linux
+# (Ubuntu, Debian). Distro-specific tasks (apt repos, PPAs) stay elsewhere.
+- name: Install common Linux packages
+  ansible.builtin.package:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - v4l-utils
+    - alsa-utils
+    - build-essential
+    - ufw
+    - sysstat
+    - handbrake
+    - x11-apps
+  become: true
+  tags: [packages]
+
+# community.general.ufw needs python3-openssl on the target
+- name: Install pyopenssl python package
+  ansible.builtin.package:
+    name: python3-openssl
+    state: present
+  become: true
+
+- name: Install fonts
+  ansible.builtin.import_tasks: "nerd_fonts.yml"
+  tags: [fonts]
+
+- name: Include UFW configuration tasks
+  ansible.builtin.import_tasks: "ufw.yml"
+  tags: [firewall]
+
+- name: Include Swap file tasks
+  ansible.builtin.import_tasks: "swap.yml"
+  tags: [swap]
+
+- name: Include LaTeX tasks
+  ansible.builtin.import_tasks: "tex.yml"
+  tags: [tex, latex]
+
+- name: Include fail2ban tasks 
+  ansible.builtin.import_tasks: "fail2ban.yml"
+  tags: [fail2ban]
+
+- name: Include x11 tasks (server-side ssh config)
+  ansible.builtin.import_tasks: "x11.yml"
+  tags: [x11, minimal]
+
+- name: Remove unused packages 
+  ansible.builtin.package:
+    name:
+      - nano
+      - sendmail
+    state: absent
+    purge: true
+  become: true
+  tags: [packages, cleanup, minimal]

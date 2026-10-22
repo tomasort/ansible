@@ -3,14 +3,14 @@
   package:
     name: python3
     state: present
-  become: true
+  become: "{{ ansible_os_family != 'Darwin' }}"
 
   # Pip installation
 - name: Ensure Pip is installed.
   package:
     name: "{{ pip_package }}"
     state: present
-  become: true
+  become: "{{ ansible_os_family != 'Darwin' }}"
   tags: [ pip ]
 
 - name: Ensure pip packages are installed.
@@ -28,7 +28,7 @@
   package:
     name: "pipx"
     state: present
-  become: true
+  become: "{{ ansible_os_family != 'Darwin' }}"
   tags: [ pip, pipx ]
 
 - name: Ensure pipx packages are installed.

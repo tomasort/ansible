@@ -1,6 +1,8 @@
 ---
 # tasks file for common
-- name: Install required/minimal packages
+
+# Packages whose names are identical on apt and brew — every platform, one list.
+- name: Install shared packages
   ansible.builtin.package:
     name: "{{ item }}"
     state: present
@@ -20,34 +22,20 @@
     - php
     - luarocks
     - maven
-    - xclip
-    - xsel # for cht.sh
     - rlwrap # for cht.sh
     - git-lfs
     - neofetch
-    - default-jre
-    - default-jdk
+    - python3
     - lynx
-    - python3-debugpy
-    - 7zip 
-    - poppler-utils 
-    - fd-find  
-    - zoxide 
+    - zoxide
     - dnsmasq
     - btop
     - bmon
-  become: true
-  tags: [packages, minimal, required]
-
-- name: Install extra packages
-  ansible.builtin.package:
-    name: "{{ item }}"
-    state: present
-  loop:
+    - 7zip              # brew resolves this alias to sevenzip
     - moreutils
     - imagemagick
     - wget
-    - npm
+    - npm               # brew alias resolves to node
     - tmux
     - tree
     - openvpn
@@ -56,33 +44,46 @@
     - pwgen
     - ffmpeg
     - hashcat
-  become: true
-  tags: [packages]
+  become: "{{ ansible_os_family != 'Darwin' }}"
+  tags: [packages, minimal, required]
 
-- name: Install packages not for MacOS
+# apt-only names (no brew formula, or the shared name means something different).
+- name: Install Linux-only packages
   ansible.builtin.package:
     name: "{{ item }}"
     state: present
-  loop:
-    - htop # there is a cooler version for macos
-    - handbrake
-    - x11-apps
-  become: true
   when: ansible_os_family != 'Darwin'
+  loop:
+    - xclip
+    - xsel # for cht.sh
+    - default-jre       # apt meta-package; brew equivalent is openjdk (below)
+    - default-jdk
+    - python3-debugpy
+    - poppler-utils
+    - fd-find
+  become: true
   tags: [packages]
 
-- name: Install Go for Linux {{ go_arch }}
+# brew-only names (apt equivalent already covered in the Linux list above).
+- name: Install macOS-only packages
+  ansible.builtin.package:
+    name: "{{ item }}"
+    state: present
+  when: ansible_os_family == 'Darwin'
+  become: "{{ ansible_os_family != 'Darwin' }}"
+  loop:
+    - openjdk
+    - fd
+    - poppler
+  tags: [packages, minimal, required]
+
+- name: Install Go (tarball, any platform)
   ansible.builtin.import_tasks: "go.yml"
-  when: ansible_os_family != 'Darwin'
   tags: [go]
 
-- name: Install go for MacOs
-  ansible.builtin.package:
-    name: go
-    state: present
-  become: true
-  when: ansible_os_family == 'Darwin'
-  tags: [go]
+- name: Install tools that require Go
+  ansible.builtin.import_tasks: "go_tools.yml"
+  tags: [go-tools]
 
 - name: Stow dotfiles
   ansible.builtin.import_tasks: "dotfiles.yml"
@@ -96,13 +97,17 @@
   ansible.builtin.import_tasks: "zsh.yml"
   tags: [zsh, dotfiles, shell, minimal]
 
+- name: Install ruby (toolchain, every platform)
+  ansible.builtin.import_tasks: "ruby.yml"
+  tags: [ruby]
+
+- name: Install colorls (ruby-gem tool)
+  ansible.builtin.import_tasks: "colorls.yml"
+  tags: [colorls]
+
 - name: Include git tasks
   ansible.builtin.import_tasks: "git.yml"
   tags: [dotfiles, git, minimal]
-
-# - name: Include vim tasks
-#   ansible.builtin.import_tasks: "vim.yml"
-#   tags: [vim, minimal]
 
 - name: Include agent skills setup (submodule + hyperframes)
   ansible.builtin.import_tasks: "skills.yml"
@@ -116,18 +121,6 @@
   ansible.builtin.import_tasks: "ssh.yml"
   tags: [ssh, minimal]
 
-- name: Include x11 tasks
-  ansible.builtin.import_tasks: "x11.yml"
-  tags: [x11, minimal]
-
-- name: Include Latex tasks
-  ansible.builtin.import_tasks: "tex.yml"
-  tags: [tex, latex]
-
-- name: Include fail2ban tasks
-  ansible.builtin.import_tasks: "fail2ban.yml"
-  tags: [fail2ban, minimal]
-
 - name: Include tmux tasks
   ansible.builtin.import_tasks: "tmux.yml"
   tags: [tmux, minimal, dotfiles]
@@ -136,22 +129,14 @@
   ansible.builtin.import_tasks: "node.yml"
   tags: [node, minimal]
 
-- name: Include rust tasks
+- name: Include rust toolchain tasks
   ansible.builtin.import_tasks: "rust.yml"
   tags: [rust, minimal]
+
+- name: Include cargo-built tools
+  ansible.builtin.import_tasks: "rust_tools.yml"
+  tags: [rust-tools]
 
 - name: Include uv installation
   ansible.builtin.import_tasks: "uv.yml"
   tags: [uv, minimal]
-
-# TODO: install duf https://github.com/muesli/duf
-
-- name: Remove unused packages.
-  ansible.builtin.package:
-    name:
-      - nano
-      - sendmail
-    state: absent
-    purge: true
-  become: true
-  tags: [packages, cleanup, minimal]

@@ -14,9 +14,17 @@
   become: true
   tags: [packages]
 
-- name: Include network configuration tasks
+- name: Include wifi dongle driver tasks (RTL8812AU detection/build/rules)
+  import_tasks: "wifi_driver.yml"
+  tags: [drivers, wifi]
+
+- name: Include network configuration tasks (NetworkManager + wlan0)
   import_tasks: "network.yml"
-  tags: [network]
+  tags: [network, wifi]
+
+- name: Include wifi watchdog tasks (script + systemd unit)
+  import_tasks: "wifi_watchdog.yml"
+  tags: [wifi]
 
 - name: Include gpio configuration tasks
   import_tasks: "gpio.yml"

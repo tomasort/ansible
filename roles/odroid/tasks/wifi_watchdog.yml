@@ -1,0 +1,111 @@
+---
+# WiFi watchdog service — connectivity monitor that soft-restarts (nmcli)
+# or hard-restarts (modprobe reload) after repeated ping failures.
+- name: Deploy WiFi watchdog script
+  ansible.builtin.copy:
+    dest: /usr/local/bin/wifi-watchdog.sh
+    content: |
+      #!/bin/bash
+      # WiFi watchdog: monitors connectivity and recovers from drops.
+      # Checks every 30s. After 3 consecutive failures, restarts WiFi.
+      # After 5 consecutive failures, reloads the USB WiFi adapter driver.
+
+      IFACE="wlan0"
+      GATEWAY="192.168.4.1"
+      FAIL_COUNT=0
+      MAX_SOFT_FAILURES=3
+      MAX_HARD_FAILURES=5
+      CHECK_INTERVAL=30
+
+      log() {
+          logger -t wifi-watchdog "$1"
+          echo "$(date): $1"
+      }
+
+      soft_restart() {
+          log "Soft restart: bringing WiFi connection back up"
+          nmcli device disconnect "$IFACE" 2>/dev/null
+          sleep 2
+          nmcli device connect "$IFACE" 2>/dev/null
+          sleep 5
+      }
+
+      hard_restart() {
+          log "Hard restart: reloading 8821au driver module"
+          nmcli device disconnect "$IFACE" 2>/dev/null
+          sleep 1
+          ip link set "$IFACE" down 2>/dev/null
+          sleep 1
+          modprobe -r 8821au 2>/dev/null
+          sleep 3
+          modprobe 8821au 2>/dev/null
+          sleep 5
+          nmcli device connect "$IFACE" 2>/dev/null
+          sleep 5
+      }
+
+      while true; do
+          if ping -c 1 -W 3 -I "$IFACE" "$GATEWAY" > /dev/null 2>&1; then
+              if [ $FAIL_COUNT -gt 0 ]; then
+                  log "Connectivity restored after $FAIL_COUNT failures"
+              fi
+              FAIL_COUNT=0
+          else
+              FAIL_COUNT=$((FAIL_COUNT + 1))
+              log "Ping failed ($FAIL_COUNT consecutive)"
+
+              if [ $FAIL_COUNT -ge $MAX_HARD_FAILURES ]; then
+                  hard_restart
+                  FAIL_COUNT=0
+              elif [ $FAIL_COUNT -ge $MAX_SOFT_FAILURES ]; then
+                  soft_restart
+              fi
+          fi
+          sleep $CHECK_INTERVAL
+      done
+    owner: root
+    group: root
+    mode: "0755"
+  become: true
+  tags: [wifi]
+
+- name: Deploy WiFi watchdog service
+  ansible.builtin.copy:
+    dest: /etc/systemd/system/wifi-watchdog.service
+    content: |
+      [Unit]
+      Description=WiFi watchdog - detect and recover from WiFi drops
+      After=NetworkManager.service
+      Wants=NetworkManager.service
+
+      [Service]
+      Type=simple
+      Restart=always
+      RestartSec=10
+      ExecStart=/usr/local/bin/wifi-watchdog.sh
+
+      [Install]
+      WantedBy=multi-user.target
+    owner: root
+    group: root
+    mode: "0644"
+  become: true
+  tags: [wifi]
+
+- name: Disable old WiFi keepalive timer
+  ansible.builtin.systemd:
+    name: wifi-keepalive.timer
+    state: stopped
+    enabled: false
+  become: true
+  failed_when: false
+  tags: [wifi]
+
+- name: Enable and start WiFi watchdog service
+  ansible.builtin.systemd:
+    name: wifi-watchdog.service
+    state: started
+    enabled: true
+    daemon_reload: true
+  become: true
+  tags: [wifi]

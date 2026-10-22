@@ -10,11 +10,7 @@
     rule: "{{ item.rule }}"
     port: "{{ item.port }}"
     proto: "{{ item.proto }}"
-  with_items:
-    - { rule: allow, port: 22, proto: tcp }
-    - { rule: allow, port: 80, proto: tcp }
-    - { rule: allow, port: 443, proto: tcp }
-    - { rule: allow, port: 51820, proto: udp }  # WireGuard VPN port
+  with_items: "{{ ufw_allowed_ports }}"
   become: true
 
 - name: Configure default incoming/outgoing rules with ufw

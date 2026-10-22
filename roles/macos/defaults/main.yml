@@ -1,0 +1,6 @@
+---
+# Overridable host-context lookups, shared baseline for every role task
+# (works on any platform, overridable per host/play).
+home: "{{ lookup('env', 'HOME') }}"
+user: "{{ lookup('env', 'USER') }}"
+path: "{{ lookup('env', 'PATH') }}"

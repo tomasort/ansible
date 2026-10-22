@@ -1,0 +1,17 @@
+---
+# Overridable host-context lookups, shared baseline for every role task
+# (works on any platform, overridable per host/play).
+home: "{{ lookup('env', 'HOME') }}"
+user: "{{ lookup('env', 'USER') }}"
+path: "{{ lookup('env', 'PATH') }}"
+nerd_font: FiraCode
+swap:
+  size_gb: 6
+  swappiness: 80
+
+# Opened by ufw; override per device (e.g. pivpn WireGuard port on the Pi)
+ufw_allowed_ports:
+  - { rule: allow, port: 22, proto: tcp }
+  - { rule: allow, port: 80, proto: tcp }
+  - { rule: allow, port: 443, proto: tcp }
+  - { rule: allow, port: 51820, proto: udp }  # WireGuard VPN port

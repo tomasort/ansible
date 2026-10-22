@@ -1,8 +1,5 @@
 ---
 # vars file for common
-home: "{{ lookup('env', 'HOME') }}"
-user: "{{ lookup('env', 'USER') }}"
-path: "{{ lookup('env', 'PATH') }}"
 git_name: "tomasort"
 key: ".ssh/id_ed25519"
 

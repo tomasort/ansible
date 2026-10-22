@@ -7,15 +7,6 @@
     clone: true
     force: true
 
-# .zshrc.local holds machine secrets (API keys interpolated by opencode.json,
-# read by nvim/minuet). It lives in the dotfiles tree but is git-ignored there;
-# the vault-encrypted copy in roles/common/files/.zshrc.local is its source.
-- name: Install private .zshrc.local into the dotfiles tree
-  ansible.builtin.copy:
-    src: .zshrc.local
-    dest: "{{ [home, 'dotfiles', '.zshrc.local'] | path_join }}"
-    mode: '0600'
-
 - name: Run pre-stow conflict resolution script
   ansible.builtin.command: "./remove_conflicting_files.sh"
   args:

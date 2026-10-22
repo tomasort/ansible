@@ -1,7 +1,23 @@
 ---
+# Overridable host-context lookups, shared baseline for every role task
+# (works on any platform, overridable per host/play).
+home: "{{ lookup('env', 'HOME') }}"
+user: "{{ lookup('env', 'USER') }}"
+path: "{{ lookup('env', 'PATH') }}"
+
 zsh_theme: robbyrussell
+
 go_version: "1.23.6"
-go_platform: "linux"
-go_arch: "arm64"
+go_platform: "{{ 'darwin' if ansible_os_family == 'Darwin' else 'linux' }}"
+go_arch: "{{ 'arm64' if ansible_architecture in ['aarch64', 'arm64'] else 'amd64' }}"
 go_tarball: "go{{ go_version }}.{{ go_platform }}-{{ go_arch }}.tar.gz"
 go_download_url: "https://go.dev/dl/{{ go_tarball }}"
+
+# For Python 3, use python3-pip.
+pip_package: python3-pip
+
+pip_executable: "{{ 'pip3' if pip_package.startswith('python3') else 'pip' }}"
+pip_install_packages: []
+
+pipx_executable: pipx
+pipx_install_packages: []

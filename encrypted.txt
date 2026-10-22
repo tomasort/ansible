@@ -1,2 +1,0 @@
-roles/*/files/.ssh/*
-roles/*/vars/main/vault.yml

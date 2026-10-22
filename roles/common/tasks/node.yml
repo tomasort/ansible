@@ -17,23 +17,36 @@
   args:
     creates: "{{ home }}/.nvm/nvm.sh"
 
-- name: Install Node using NVM
+- name: Check for installed Node 22 (reproducible pinned major)
+  ansible.builtin.find:
+    paths: "{{ home }}/.nvm/versions/node/"
+    patterns: "v22.*"
+    file_type: directory
+  register: node22_glob
+  changed_when: false
+
+- name: Install Node 22 using NVM
   ansible.builtin.shell: |
     source {{ home }}/.nvm/nvm.sh
-    nvm install --lts
+    nvm install 22 --latest-npm
   args:
     executable: /bin/bash
+  when: node22_glob.matched == 0
 
 - name: Install pnpm
   ansible.builtin.shell: |
     curl -fsSL https://get.pnpm.io/install.sh | sh -
   args:
     executable: /bin/bash
+    creates: "{{ home }}/.local/bin/pnpm"
 
 - name: Install global packages with npm
   community.general.npm:
     name: "{{ item }}"
     global: true
+    # macOS sudo's secure_path excludes /usr/local/bin (brew's npm home),
+    # so point the module at npm explicitly there
+    executable: "{{ '/usr/local/bin/npm' if ansible_os_family == 'Darwin' else omit }}"
   loop:
     - typescript
     - eslint

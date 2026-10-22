@@ -1,0 +1,8 @@
+---
+# Shared vars for playbooks that provision server machines.
+# Loaded with: vars_files: [ "vars/common.yml" ]
+
+docker_users:
+  - "{{ lookup('env', 'USER') }}"
+  - root
+docker_install_compose: true

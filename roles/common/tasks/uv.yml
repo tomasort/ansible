@@ -9,3 +9,5 @@
 - name: Install uv using installation script
   ansible.builtin.shell:
     cmd: curl -LsSf https://astral.sh/uv/install.sh | sh
+  args:
+    creates: "{{ home }}/.local/bin/uv"

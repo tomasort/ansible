@@ -1,0 +1,63 @@
+---
+# Tools installed via `go install`. Requires the toolchain from go.yml.
+- name: Check if duf is already installed
+  ansible.builtin.stat:
+    path: "{{ home }}/go/bin/duf"
+  register: duf_installed
+  tags: [go-tools]
+
+- name: Install duf (pinned version, no clone needed in Go >= 1.16)
+  ansible.builtin.command: /usr/local/go/bin/go install github.com/muesli/duf@v0.9.1
+  environment:
+    PATH: "/usr/local/go/bin:{{ path }}"
+  when: not duf_installed.stat.exists
+  tags: [go-tools]
+
+- name: Check if cheat is already installed
+  ansible.builtin.stat:
+    path: "{{ home }}/go/bin/cheat"
+  register: cheat_installed
+  tags: [go-tools]
+
+- name: Install cheat using go install
+  ansible.builtin.command: /usr/local/go/bin/go install github.com/cheat/cheat/cmd/cheat@latest
+  environment:
+    PATH: "/usr/local/go/bin:{{ path }}"
+  when: not cheat_installed.stat.exists
+  tags: [go-tools]
+
+- name: Ensure cheat config directory exists
+  ansible.builtin.file:
+    path: "{{ home }}/.config/cheat/cheatsheets"
+    state: directory
+    mode: '0755'
+    recurse: yes
+  tags: [go-tools]
+
+- name: Check if community cheatsheets already exist
+  ansible.builtin.stat:
+    path: "{{ home }}/.config/cheat/cheatsheets/community"
+  register: community_cheatsheets
+  tags: [go-tools]
+
+- name: Clone community cheatsheets for cheat
+  ansible.builtin.git:
+    repo: "https://github.com/cheat/cheatsheets.git"
+    dest: "{{ home }}/.config/cheat/cheatsheets/community"
+    update: yes
+  when: not community_cheatsheets.stat.exists or community_cheatsheets.stat.isdir
+  tags: [go-tools]
+
+- name: Check if lazygit is already installed
+  ansible.builtin.stat:
+    path: "{{ home }}/go/bin/lazygit"
+  register: lazygit_installed
+  tags: [go-tools]
+
+- name: Install lazygit (pinned version, modern module-mode install)
+  ansible.builtin.command: /usr/local/go/bin/go install github.com/jesseduffield/lazygit@v0.66.2
+  environment:
+    PATH: "/usr/local/go/bin:{{ path }}"
+  when: not lazygit_installed.stat.exists
+  tags: [go-tools]
+

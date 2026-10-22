@@ -1,0 +1,12 @@
+- hosts: localhost
+  tags: casaos 
+  gather_facts: true
+  vars_files:
+    - vars/common.yml
+
+  roles:
+    - common
+    - linux
+    - role: geerlingguy.docker
+      become: true
+      tags: [docker]

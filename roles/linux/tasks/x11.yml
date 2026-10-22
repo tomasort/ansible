@@ -7,26 +7,6 @@
     firstmatch: true
   become: true
 
-- name: Ensure X11 forwarding is enabled on the client side
-  ansible.builtin.lineinfile:
-    path: /etc/ssh/ssh_config
-    regexp: '^#?ForwardX11'
-    insertafter: 'Host *'
-    line: 'ForwardX11 yes'
-    firstmatch: true
-  become: true
-
-- name: Ensure X11 forwarding is disabled for github.com
-  ansible.builtin.blockinfile:
-    path: /etc/ssh/ssh_config
-    marker: "# {mark} ANSIBLE MANAGED BLOCK - GITHUB X11"
-    block: |
-      Host github.com
-        ForwardX11 no
-    insertbefore: '^Host \*'
-  become: true
-
-
 - name: Restart SSH service
   ansible.builtin.service:
     name: ssh
@@ -42,4 +22,3 @@
   ansible.builtin.debug:
     msg: "X11 forwarding is configured: {{ x11_enabled_config.stdout == '1' }}"
 
-# client configuration

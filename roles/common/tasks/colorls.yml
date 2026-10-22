@@ -1,0 +1,17 @@
+---
+# Ruby-gem tools. Requires the toolchain from ruby.yml.
+- name: Install colorls (Linux; system-wide gem)
+  community.general.gem:
+    name: colorls
+    state: present
+  become: true
+  when: ansible_os_family != 'Darwin'
+  tags: [colorls]
+
+- name: Install colorls (macOS; user-level gem)
+  community.general.gem:
+    name: colorls
+    state: present
+    user_install: true
+  when: ansible_os_family == 'Darwin'
+  tags: [colorls]

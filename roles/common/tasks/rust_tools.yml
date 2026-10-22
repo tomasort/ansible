@@ -1,0 +1,57 @@
+---
+# Tools built with cargo. Requires the toolchain from rust.yml.
+
+# Yazi is built from its pinned release tag (--locked keeps deps deterministic).
+- name: Ensure swap is enabled before building Yazi
+  ansible.builtin.include_tasks: "../../linux/tasks/swap.yml"
+  when: ansible_os_family != 'Darwin'
+  tags: [swap, yazi, rust-tools]
+
+- name: Check if yazi is already installed
+  ansible.builtin.stat:
+    path: /usr/local/bin/yazi
+  register: yazi_installed
+  tags: [rust-tools, yazi]
+
+- name: Clone Yazi repository at pinned version
+  ansible.builtin.git:
+    repo: https://github.com/sxyazi/yazi.git
+    dest: "{{ home }}/yazi-src"
+    version: "v26.9.1"
+    update: yes
+  when: not yazi_installed.stat.exists
+  tags: [rust-tools, yazi]
+
+- name: Build Yazi from source
+  ansible.builtin.command: cargo build --release --locked
+  args:
+    chdir: "{{ home }}/yazi-src"
+  environment:
+    PATH: "{{ home }}/.cargo/bin:{{ path }}"
+    # Limit parallelism to avoid OOM on low-RAM devices like Odroid/Pi
+    CARGO_BUILD_JOBS: "2"
+  when: not yazi_installed.stat.exists
+  tags: [rust-tools, yazi]
+
+- name: Copy Yazi binaries to /usr/local/bin
+  ansible.builtin.copy:
+    src: "{{ home }}/yazi-src/target/release/{{ item }}"
+    dest: "/usr/local/bin/{{ item }}"
+    mode: "0755"
+    remote_src: yes
+  loop:
+    - yazi
+    - ya
+  become: true
+  when: not yazi_installed.stat.exists
+  tags: [rust-tools, yazi]
+
+- name: Install navi if not installed
+  community.general.cargo:
+    name: "{{ item }}"
+    locked: true
+  environment:
+    PATH: "{{ home }}/.cargo/bin:{{ path }}"
+  loop:
+    - navi
+  tags: [rust-tools]

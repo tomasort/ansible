@@ -1,0 +1,191 @@
+---
+# RTL8812AU USB WiFi dongle driver — detection, source build via DKMS,
+# module load, and the power/autosuspend rules for the TP-Link RTL8821AU.
+# WiFi Driver Detection and Installation with Error Handling
+# This task detects existing WiFi drivers and only installs RTL8812AU if needed
+
+- name: Check for existing WiFi interface
+  ansible.builtin.command: "ip link show type wlan"
+  register: wlan_interface_check
+  changed_when: false
+  failed_when: false
+  become: true
+  tags: [drivers, wifi]
+
+- name: Get currently loaded WiFi driver information
+  ansible.builtin.shell: |
+    if [ -e /sys/class/net/wlan0 ]; then
+      DRIVER=$(ethtool -i wlan0 2>/dev/null | grep -i "^driver:" | awk '{print $2}')
+      VERSION=$(cat /sys/class/net/wlan0/device/driver/module/version 2>/dev/null || echo "unknown")
+      echo "driver=$DRIVER,version=$VERSION"
+    else
+      echo "driver=none,version=none"
+    fi
+  register: current_wifi_driver
+  changed_when: false
+  failed_when: false
+  become: true
+  tags: [drivers, wifi]
+
+- name: Display current WiFi driver status
+  debug:
+    msg: "Current WiFi driver: {{ current_wifi_driver.stdout }}"
+  tags: [drivers, wifi]
+
+- name: Set driver detection facts
+  set_fact:
+    wifi_driver_loaded: "{{ current_wifi_driver.stdout.split(',')[0].split('=')[1] != 'none' }}"
+    current_driver_name: "{{ current_wifi_driver.stdout.split(',')[0].split('=')[1] }}"
+  tags: [drivers, wifi]
+
+- name: Check if RTL88XXAU module is loaded
+  ansible.builtin.shell: "lsmod | grep -qw 88XXau"
+  register: rtl88XXau_module_check
+  changed_when: false
+  failed_when: false
+  become: true
+  tags: [drivers, wifi]
+
+- name: Install RTL8812AU Driver (if no WiFi driver detected)
+  block:
+    - name: Install build dependencies for WiFi driver
+      package:
+        name:
+          - build-essential
+          - linux-headers-{{ ansible_kernel }}
+          - git
+        state: present
+      become: true
+      tags: [drivers, wifi]
+
+    - name: Clone RTL8812AU driver repository at v5.6.4.2 (kernel 6.6+ compatible)
+      git:
+        repo: "https://github.com/aircrack-ng/rtl8812au.git"
+        dest: "/tmp/rtl8812au"
+        version: "v5.6.4.2"  # Using v5.6.4.2 which has fixes for kernel 6.6+
+        force: yes
+      register: rtl8812au_clone
+      tags: [drivers, wifi]
+
+    - name: Build RTL8812AU Wi-Fi driver
+      ansible.builtin.command: "make"
+      args:
+        chdir: "/tmp/rtl8812au"
+      become: true
+      register: rtl8812au_build
+      failed_when: false
+      tags: [drivers, wifi]
+
+    - name: Check if driver build succeeded
+      fail:
+        msg: |
+          Failed to build RTL8812AU driver. Build output:
+          {{ rtl8812au_build.stderr | default('No stderr') }}
+      when: rtl8812au_build.rc != 0
+      tags: [drivers, wifi]
+
+    - name: Install RTL8812AU Wi-Fi driver using DKMS
+      ansible.builtin.command: "make dkms_install"
+      args:
+        chdir: "/tmp/rtl8812au"
+      become: true
+      register: rtl8812au_install
+      failed_when: false
+      tags: [drivers, wifi]
+
+    - name: Handle DKMS installation failure
+      block:
+        - name: Log DKMS installation error
+          debug:
+            msg: |
+              DKMS installation failed with output:
+              {{ rtl8812au_install.stderr | default('No stderr') }}
+          tags: [drivers, wifi]
+
+        - name: Fallback to standard make install
+          ansible.builtin.command: "make install"
+          args:
+            chdir: "/tmp/rtl8812au"
+          become: true
+          register: rtl8812au_make_install
+          tags: [drivers, wifi]
+
+        - name: Verify fallback installation
+          fail:
+            msg: "Both DKMS and make install failed for RTL8812AU driver"
+          when: rtl8812au_make_install.rc != 0
+          tags: [drivers, wifi]
+      when: rtl8812au_install.rc != 0
+      tags: [drivers, wifi]
+
+    - name: Load the Wi-Fi driver module
+      modprobe:
+        name: 88XXau
+        state: present
+      become: true
+      register: modprobe_result
+      failed_when: false
+      tags: [drivers, wifi]
+
+    - name: Verify driver loaded successfully
+      ansible.builtin.shell: "lsmod | grep -qw 88XXau"
+      register: driver_verification
+      failed_when: false
+      changed_when: false
+      tags: [drivers, wifi]
+
+    - name: Log driver loading result
+      debug:
+        msg: "RTL8812AU driver module {{ 'loaded successfully' if driver_verification.rc == 0 else 'failed to load' }}"
+      tags: [drivers, wifi]
+
+  when: not wifi_driver_loaded and rtl88XXau_module_check.rc != 0
+  rescue:
+    - name: WiFi driver installation failed
+      debug:
+        msg: |
+          Failed to install RTL8812AU driver.
+          A WiFi interface is not currently detected.
+          Please check kernel logs with: sudo dmesg | grep -i wifi
+          You can also manually check driver compatibility at: https://github.com/aircrack-ng/rtl8812au/issues
+      tags: [drivers, wifi]
+  tags: [drivers, wifi]
+
+- name: Display WiFi driver installation outcome
+  debug:
+    msg: |
+      WiFi driver status:
+      - Existing driver detected: {{ wifi_driver_loaded }}
+      - Driver name: {{ current_driver_name if wifi_driver_loaded else 'None' }}
+      - RTL8812AU installed: {{ (driver_verification.rc is defined and driver_verification.rc == 0) | default(false) }}
+  tags: [drivers, wifi]
+
+- name: Disable RTL8821AU driver power management via modprobe
+  ansible.builtin.copy:
+    dest: /etc/modprobe.d/8821au.conf
+    content: |
+      # Disable power management for RTL8821AU WiFi adapter to prevent
+      # DISASSOC_LOW_ACK (reason 34) disconnections from the router.
+      #   rtw_power_mgnt=0  - Disable firmware power management (was 2=MAX)
+      #   rtw_ips_mode=0    - Disable Inactive Power Save
+      #   rtw_enusbss=0     - Disable USB selective suspend in driver
+      options 8821au rtw_power_mgnt=0 rtw_ips_mode=0 rtw_enusbss=0
+    owner: root
+    group: root
+    mode: "0644"
+  become: true
+  tags: [wifi, drivers]
+
+- name: Disable USB autosuspend for TP-Link WiFi adapter
+  ansible.builtin.copy:
+    dest: /etc/udev/rules.d/60-wifi-no-autosuspend.rules
+    content: |
+      # Disable USB autosuspend for TP-Link Archer T2U PLUS (RTL8821AU)
+      ACTION=="add", SUBSYSTEM=="usb", ATTR{idVendor}=="2357", ATTR{idProduct}=="0120", ATTR{power/autosuspend}="-1", ATTR{power/control}="on"
+    owner: root
+    group: root
+    mode: "0644"
+  become: true
+  notify: reload udev rules
+  tags: [wifi, drivers]
+
