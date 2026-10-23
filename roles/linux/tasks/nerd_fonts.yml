@@ -9,7 +9,10 @@
 
 - name: "Find {{ nerd_font }} asset information"
   set_fact:
-    nerd_font_asset: "{{ release_info.json | json_query('assets[?name==`' + nerd_font + '.zip`]') | first }}"
+    # native Jinja equivalent of json_query('assets[?name==`X.zip`]') — avoids
+    # the jmespath dependency that json_query needs (and that ansible's
+    # uv-managed venv does not provide).
+    nerd_font_asset: "{{ release_info.json.assets | selectattr('name', 'equalto', nerd_font ~ '.zip') | first }}"
 
 - name: "Debug {{ nerd_font }} asset"
   debug:
