@@ -124,14 +124,21 @@
   register: tree_sitter_download
   tags: [treesitter]
 
+- name: Check if the tree-sitter binary is already in place
+  ansible.builtin.stat:
+    path: "{{ [home, '.local/bin/tree-sitter'] | path_join }}"
+  register: ts_binary
+  when: tree_sitter_check.rc != 0
+  tags: [treesitter]
+
 - name: Decompress tree-sitter binary
   ansible.builtin.command:
     argv:
       - gunzip
       - -f
       - "{{ [home, '.local/bin/tree-sitter.gz'] | path_join }}"
-  when: tree_sitter_download.changed
-  register: tree_sitter_unzip
+  when: tree_sitter_check.rc != 0 and not ts_binary.stat.exists
+  register: ts_unzip
   changed_when: true
   tags: [treesitter]
 
@@ -139,5 +146,5 @@
   ansible.builtin.file:
     path: "{{ [home, '.local/bin/tree-sitter'] | path_join }}"
     mode: "0755"
-  when: tree_sitter_download.changed
+  when: ts_unzip.changed | default(false)
   tags: [treesitter]

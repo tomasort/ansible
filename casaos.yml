@@ -1,8 +1,21 @@
 - hosts: localhost
-  tags: casaos 
+  tags: casaos
   gather_facts: true
   vars_files:
     - vars/common.yml
+
+  # tag-scoped runs (e.g. --tags docker) skip implicit fact gathering unless
+  # this task is tagged `always`, which forces it to run in every selection.
+  pre_tasks:
+    - name: Gather facts (required by tag-scoped runs)
+      ansible.builtin.setup:
+      tags: [always]
+
+  # become-tasks execute modules with this venv's python on localhost; without
+  # this, root-owned __pycache__ dirs land inside the uv tool venv and break
+  # later `uv tool install --reinstall` runs.
+  environment:
+    PYTHONDONTWRITEBYTECODE: "1"
 
   roles:
     - common

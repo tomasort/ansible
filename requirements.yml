@@ -1,7 +1,8 @@
 ---
 roles:
   - name: elliotweiser.osx-command-line-tools
-  - name: geerlingguy.docker 
+  - name: geerlingguy.docker
 
 collections:
   - name: geerlingguy.mac
+  - name: ansible.posix
