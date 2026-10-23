@@ -23,7 +23,7 @@
     name: "{{ item }}"
     state: present
   become: true
-  loop: "{{ 'ninja-build gettext cmake curl build-essential' if ansible_os_family != 'Darwin' else 'ninja gettext cmake curl' | split }}"
+  loop: "{{ ('ninja-build gettext cmake curl build-essential' if ansible_os_family != 'Darwin' else 'ninja gettext cmake curl') | split }}"
   when: nvim_installed.rc != 0
 
 - name: Build nvim
