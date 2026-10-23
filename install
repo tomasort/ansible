@@ -7,6 +7,9 @@
 
 set -euo pipefail
 
+# PATH as the invoking shell had it, before this script prepends ~/.local/bin.
+INVOKING_PATH="${PATH:-}"
+
 usage() {
   echo "Usage: $0 [-r]"
   echo "  -r  Install Ansible Roles and other requirements only"
@@ -47,6 +50,21 @@ install_ansible() {
     exit 1
   fi
   ansible --version | head -1
+
+  # The checks above prove the script's own PATH. The shell that invoked the
+  # script may not have ~/.local/bin at all (e.g. opened before uv created it),
+  # in which case `ansible` there keeps resolving to a distro copy like
+  # /usr/bin/ansible 2.14. Say so explicitly with the remedy.
+  case ":${INVOKING_PATH}:" in
+    *":$HOME/.local/bin:"*) ;;
+    *)
+      echo >&2
+      echo "note: ~/.local/bin is not on the PATH of this shell, so 'ansible'" >&2
+      echo "      here still resolves to: $(command -v ansible 2>/dev/null || echo '<nothing>')" >&2
+      echo "      Add it to your shell rc and open a new shell:" >&2
+      echo '        export PATH="$HOME/.local/bin:$PATH"' >&2
+      ;;
+  esac
 }
 
 # Parse command line arguments
