@@ -71,7 +71,7 @@
     msg: "Using the zsh theme {{ zsh_theme }}"
 
 # .zshrc.local holds machine secrets (API keys read by opencode/nvim/minuet).
-- name: Render private .zshrc.local into the dotfiles tree
+- name: Render private .zshrc.local
   ansible.builtin.template:
     src: .zshrc.local.j2
     dest: "{{ [home, '.zshrc.local'] | path_join }}"

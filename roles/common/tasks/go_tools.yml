@@ -34,18 +34,14 @@
     recurse: yes
   tags: [go-tools]
 
-- name: Check if community cheatsheets already exist
-  ansible.builtin.stat:
-    path: "{{ home }}/.config/cheat/cheatsheets/community"
-  register: community_cheatsheets
-  tags: [go-tools]
-
-- name: Clone community cheatsheets for cheat
+- name: Clone/update community cheatsheets (dir stays pristine; personal sheets live elsewhere)
+  # force+update: rebuilds torn/crash leftovers and drops anything modified —
+  # deliberate, since community sheets are treated as read-only upstream state.
   ansible.builtin.git:
     repo: "https://github.com/cheat/cheatsheets.git"
     dest: "{{ home }}/.config/cheat/cheatsheets/community"
+    force: yes
     update: yes
-  when: not community_cheatsheets.stat.exists or community_cheatsheets.stat.isdir
   tags: [go-tools]
 
 - name: Check if lazygit is already installed
