@@ -85,4 +85,59 @@
 
 # TODO: set the variable GITHUB_COPILOT_TOKEN or GH_COPILOT_TOKEN in the environment to the github token
 
-# TODO: for the new version of neovim, install the treesitter cli (e.g. via MasonToolsInstallSync with tree-sitter-cli)
+# nvim-treesitter (main branch, nvim 0.12+) requires tree-sitter-cli >= 0.26.1
+# from a system install (NOT npm) plus tar, curl and a C compiler in PATH.
+# gcc/build-essential already installed by the nvim build-deps task above.
+# Install method: official GitHub release binary in ~/.local/bin — identical on
+# macOS and Linux, no apt/brew involved. Skips if any tree-sitter is already on
+# PATH (e.g. this Mac's brew install).
+
+- name: Gather facts (needed when this block runs as a tagged subset)
+  ansible.builtin.setup:
+  tags: [treesitter]
+
+- name: Check if tree-sitter CLI is already on PATH
+  ansible.builtin.command:
+    argv:
+      - sh
+      - -lc
+      - command -v tree-sitter
+  register: tree_sitter_check
+  changed_when: false
+  failed_when: false
+  tags: [treesitter]
+
+- name: Ensure ~/.local/bin exists
+  ansible.builtin.file:
+    path: "{{ [home, '.local/bin'] | path_join }}"
+    state: directory
+    mode: "0755"
+  when: tree_sitter_check.rc != 0
+  tags: [treesitter]
+
+- name: Download tree-sitter CLI (latest stable GitHub release, all platforms)
+  ansible.builtin.get_url:
+    url: "https://github.com/tree-sitter/tree-sitter/releases/latest/download/tree-sitter-{{ 'macos' if ansible_system == 'Darwin' else 'linux' }}-{{ 'arm64' if ansible_architecture == 'aarch64' else 'x64' }}.gz"
+    dest: "{{ [home, '.local/bin/tree-sitter.gz'] | path_join }}"
+    mode: "0644"
+  when: tree_sitter_check.rc != 0
+  register: tree_sitter_download
+  tags: [treesitter]
+
+- name: Decompress tree-sitter binary
+  ansible.builtin.command:
+    argv:
+      - gunzip
+      - -f
+      - "{{ [home, '.local/bin/tree-sitter.gz'] | path_join }}"
+  when: tree_sitter_download.changed
+  register: tree_sitter_unzip
+  changed_when: true
+  tags: [treesitter]
+
+- name: Set executable bit on tree-sitter binary
+  ansible.builtin.file:
+    path: "{{ [home, '.local/bin/tree-sitter'] | path_join }}"
+    mode: "0755"
+  when: tree_sitter_download.changed
+  tags: [treesitter]

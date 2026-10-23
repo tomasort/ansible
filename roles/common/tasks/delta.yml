@@ -1,0 +1,55 @@
+---
+# Git diff pager (used by lazygit's config: `delta --dark --paging=never`),
+# installed from the pinned GitHub release into ~/.local/bin on every platform.
+# No apt/brew involved.
+
+- name: Check if delta is already on PATH
+  ansible.builtin.command:
+    argv:
+      - sh
+      - -lc
+      - command -v delta
+  register: delta_on_path
+  changed_when: false
+  failed_when: false
+  tags: [delta, minimal]
+
+- name: Ensure ~/.local/bin exists
+  ansible.builtin.file:
+    path: "{{ [home, '.local/bin'] | path_join }}"
+    state: directory
+    mode: "0755"
+  when: delta_on_path.rc != 0
+  tags: [delta, minimal]
+
+- name: Download delta from pinned GitHub release
+  ansible.builtin.get_url:
+    url: "https://github.com/dandavison/delta/releases/download/0.20.1/delta-0.20.1-{{ 'aarch64-apple-darwin' if (ansible_system == 'Darwin' and ansible_architecture == 'aarch64') else ('x86_64-apple-darwin' if ansible_system == 'Darwin' else 'x86_64-unknown-linux-gnu') }}.tar.gz"
+    dest: /tmp/delta.tar.gz
+    mode: "0644"
+  when: delta_on_path.rc != 0
+  register: delta_download
+  tags: [delta, minimal]
+
+- name: Extract delta tarball
+  ansible.builtin.unarchive:
+    src: /tmp/delta.tar.gz
+    dest: /tmp
+    remote_src: true
+  when: delta_on_path.rc != 0
+  tags: [delta, minimal]
+
+- name: Install delta binary into ~/.local/bin
+  ansible.builtin.copy:
+    src: "/tmp/delta-0.20.1-{{ 'aarch64-apple-darwin' if (ansible_system == 'Darwin' and ansible_architecture == 'aarch64') else ('x86_64-apple-darwin' if ansible_system == 'Darwin' else 'x86_64-unknown-linux-gnu') }}/delta"
+    dest: "{{ [home, '.local/bin/delta'] | path_join }}"
+    mode: "0755"
+    remote_src: true
+  when: delta_on_path.rc != 0
+  tags: [delta, minimal]
+
+- name: Clean up temp delta download
+  ansible.builtin.file:
+    path: /tmp/delta.tar.gz
+    state: absent
+  tags: [delta, minimal]

@@ -1,0 +1,47 @@
+---
+# OpenCode agent CLI, pinned to the v1 line (1.x) — v2 not wanted yet.
+# Installed via the official installer script into ~/.opencode/bin on every platform.
+# PATH is already exported in dotfiles/.zshrc (portable $HOME form).
+
+- name: Check if opencode binary is installed
+  ansible.builtin.stat:
+    path: "{{ [home, '.opencode/bin/opencode'] | path_join }}"
+  register: opencode_installed
+  tags: [opencode]
+
+- name: Probe installed opencode version
+  ansible.builtin.command:
+    argv:
+      - sh
+      - -lc
+      - "{{ [home, '.opencode/bin/opencode'] | path_join }} --version"
+  register: opencode_version
+  changed_when: false
+  failed_when: false
+  when: opencode_installed.stat.exists
+  tags: [opencode]
+
+- name: Download opencode installer script
+  ansible.builtin.get_url:
+    url: "https://opencode.ai/install"
+    dest: "/tmp/opencode-install.sh"
+    mode: "0755"
+  when: >
+    not opencode_installed.stat.exists
+    or (opencode_version.stdout | default('') | trim) != '1.18.35'
+  tags: [opencode]
+
+- name: Install pinned opencode v1 (1.18.35)
+  ansible.builtin.command:
+    argv:
+      - bash
+      - /tmp/opencode-install.sh
+      - --version
+      - "1.18.35"
+      - --no-modify-path
+  when: >
+    not opencode_installed.stat.exists
+    or (opencode_version.stdout | default('') | trim) != '1.18.35'
+  environment:
+    HOME: "{{ home }}"
+  tags: [opencode]

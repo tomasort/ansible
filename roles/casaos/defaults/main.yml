@@ -1,0 +1,15 @@
+---
+# Disk/UUID knobs for casaos server storage setup
+casaos_storage_disks:
+  - uuid: d33e93c9-1e4d-4adc-ad90-5cdec145cf15
+    mount: /mnt/Storage1_nvme-storage
+  - uuid: dcf07ee4-9997-49d0-b961-0be7e43f7bc4
+    mount: /mnt/sda_sda1
+  - uuid: 99aaf0ea-43e2-4636-b80b-d3e18d99f765
+    mount: /mnt/sdb
+
+# Users whose HOME lives on the NVMe. Add entries to create more (passwords
+# are then set interactively via `sudo passwd <name>` — never ansible-managed).
+casaos_nvme_user_home_parent: /mnt/Storage1_nvme-storage/home
+casaos_nvme_users:
+  - name: ortega

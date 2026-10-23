@@ -1,0 +1,6 @@
+---
+# tasks file for casaos role
+
+- name: Include persistent storage configuration (fstab disks + NVMe home user)
+  ansible.builtin.import_tasks: "storage.yml"
+  tags: [storage]

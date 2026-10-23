@@ -1,0 +1,37 @@
+---
+# Persistent storage config for the casaos server:
+# 1. the three big disks mounted at boot via fstab (independent of casaos.service)
+# 2. users whose HOMEs live on the 1.8T NVMe (add more in defaults/main.yml)
+# Idempotent: safe to re-run; skips existing entries.
+# Passwords are set interactively (sudo passwd <name>), never by tasks.
+# Full background: docs/plans/casaos-storage.md
+
+- name: Mount big disks at boot (fstab, nofail)
+  ansible.posix.mount:
+    src: "UUID={{ item.uuid }}"
+    path: "{{ item.mount }}"
+    fstype: ext4
+    opts: defaults,noatime,nofail
+    state: mounted
+  become: true
+  loop: "{{ casaos_storage_disks }}"
+  tags: [storage]
+
+- name: Ensure NVMe home parent exists
+  ansible.builtin.file:
+    path: "{{ casaos_nvme_user_home_parent }}"
+    state: directory
+    mode: "0755"
+  become: true
+  tags: [storage]
+
+- name: Ensure NVMe-home users exist
+  ansible.builtin.user:
+    name: "{{ item.name }}"
+    home: "{{ casaos_nvme_user_home_parent }}/{{ item.name }}"
+    groups: sudo
+    shell: /bin/bash
+    state: present
+  become: true
+  loop: "{{ casaos_nvme_users }}"
+  tags: [storage]
