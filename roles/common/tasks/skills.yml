@@ -15,10 +15,14 @@
 
 # open-code-review opencode plugin = single tracked file (dotfiles/.config/opencode/plugins);
 # only its npm dependency needs provisioning (OpenCode 1.x).
+# ~/.local/node is the stable symlink node.yml maintains at the pinned Node version.
 - name: Install OpenCodeReview opencode plugin dependency
   community.general.npm:
     name: "@opencode-ai/plugin"
     path: "{{ [home, '.config', 'opencode'] | path_join }}"
+    executable: "{{ home }}/.local/node/bin/npm"
+  environment:
+    PATH: "{{ home }}/.local/node/bin:{{ ansible_env.PATH }}"
   register: ocr_plugin_deps
   changed_when: false
   tags: [skills, dotfiles]
@@ -39,7 +43,14 @@
 # hyperframes skill family = npm-managed, installs to ~/.claude/skills and ~/.agents/skills
 # (to update later on a running machine: npx hyperframes skills update)
 - name: Install HyperFrames skills via its CLI
-  ansible.builtin.shell: "npx -y hyperframes@latest skills"
+  ansible.builtin.command:
+    argv:
+      - "{{ home }}/.local/node/bin/npx"
+      - -y
+      - hyperframes@latest
+      - skills
+  environment:
+    PATH: "{{ home }}/.local/node/bin:{{ ansible_env.PATH }}"
   args:
     creates: "{{ home }}/.claude/skills/hyperframes/SKILL.md"
   register: hyperframes_result

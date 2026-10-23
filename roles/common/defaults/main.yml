@@ -13,6 +13,10 @@ go_arch: "{{ 'arm64' if ansible_architecture in ['aarch64', 'arm64'] else 'amd64
 go_tarball: "go{{ go_version }}.{{ go_platform }}-{{ go_arch }}.tar.gz"
 go_download_url: "https://go.dev/dl/{{ go_tarball }}"
 
+# Pinned Node major, installed via nvm. Bump this to upgrade Node.
+# node.yml exposes it to everything else through the stable symlink ~/.local/node.
+node_major: "22"
+
 # For Python 3, use python3-pip.
 pip_package: python3-pip
 

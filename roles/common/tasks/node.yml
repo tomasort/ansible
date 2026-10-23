@@ -17,21 +17,39 @@
   args:
     creates: "{{ home }}/.nvm/nvm.sh"
 
-- name: Check for installed Node 22 (reproducible pinned major)
+- name: Check for installed Node {{ node_major }} (pinned major)
   ansible.builtin.find:
     paths: "{{ home }}/.nvm/versions/node/"
-    patterns: "v22.*"
+    patterns: "v{{ node_major }}.*"
     file_type: directory
-  register: node22_glob
+  register: node_installed_glob
   changed_when: false
 
-- name: Install Node 22 using NVM
+- name: Install Node {{ node_major }} using NVM
   ansible.builtin.shell: |
     source {{ home }}/.nvm/nvm.sh
-    nvm install 22 --latest-npm
+    nvm install {{ node_major }} --latest-npm
   args:
     executable: /bin/bash
-  when: node22_glob.matched == 0
+  when: node_installed_glob.matched == 0
+
+- name: Locate the installed Node {{ node_major }} directory
+  ansible.builtin.find:
+    paths: "{{ home }}/.nvm/versions/node/"
+    patterns: "v{{ node_major }}.*"
+    file_type: directory
+  register: node_dir_glob
+  changed_when: false
+
+# Single stable path for every other task (skills.yml, etc.): ~/.local/node/bin.
+# Re-running the playbook re-points it after a node_major bump; nothing else
+# needs to know the concrete version.
+- name: Symlink current Node into ~/.local/node
+  ansible.builtin.file:
+    src: "{{ node_dir_glob.files[0].path }}"
+    dest: "{{ home }}/.local/node"
+    state: link
+    force: true
 
 - name: Install pnpm
   ansible.builtin.shell: |
@@ -44,16 +62,15 @@
   community.general.npm:
     name: "{{ item }}"
     global: true
-    # macOS sudo's secure_path excludes /usr/local/bin (brew's npm home),
-    # so point the module at npm explicitly there
-    executable: "{{ '/usr/local/bin/npm' if ansible_os_family == 'Darwin' else omit }}"
+    executable: "{{ home }}/.local/node/bin/npm"
+  environment:
+    PATH: "{{ home }}/.local/node/bin:{{ ansible_env.PATH }}"
   loop:
     - typescript
     - eslint
     - prettier
     - vite
     - "@alibaba-group/open-code-review"
-  become: true
 
 - name: Change ownership of the .npm directory dynamically
   ansible.builtin.file:
