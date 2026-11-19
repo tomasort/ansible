@@ -11,16 +11,26 @@
       ansible.builtin.setup:
       tags: [always]
 
+    - name: Ensure per-user temp/build dir exists on the user's home disk
+      ansible.builtin.file:
+        path: "{{ lookup('env', 'HOME') }}/.tmp"
+        state: directory
+        mode: "0700"
+
   # become-tasks execute modules with this venv's python on localhost; without
   # this, root-owned __pycache__ dirs land inside the uv tool venv and break
   # later `uv tool install --reinstall` runs.
+  # TMPDIR: go/pip/npm build temp must not land on the 28G eMMC /tmp when the
+  # user's home lives on the NVMe (this was the "no space left on device" cause).
   environment:
     PYTHONDONTWRITEBYTECODE: "1"
+    TMPDIR: "{{ lookup('env', 'HOME') }}/.tmp"
 
   roles:
     - common
     - linux
     - casaos
+    - zimaboard
     - role: geerlingguy.docker
       become: true
       tags: [docker]

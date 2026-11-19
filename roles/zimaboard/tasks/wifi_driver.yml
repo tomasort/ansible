@@ -1,0 +1,92 @@
+---
+# RTL8821AU USB Wi-Fi driver (morrownr/8821au-20210708) built via DKMS.
+#
+# Why DKMS and not a plain `make install`: the kernel's header post-install hook
+# rebuilds every registered DKMS module automatically on kernel upgrades, so the
+# dongle keeps working after `apt upgrade` without manual intervention.
+#
+# The two patches below are needed because Debian backports newer kernel API
+# changes into 6.1.190 (linux 6.1.0-54) that upstream's version guards do not
+# anticipate: the 6.12 removal of `usb_driver.drvwrap` and the 6.5 addition of
+# the `link_id` parameter to `tdls_mgmt`. Both patches are narrow (only the
+# 6.1.190–6.1.x range is special-cased) and are no-ops on other kernels.
+
+- name: Install Wi-Fi driver build dependencies
+  ansible.builtin.package:
+    name:
+      - dkms
+      - build-essential
+      - git
+      - "linux-headers-{{ ansible_kernel }}"
+      - linux-headers-amd64 # headers for future kernels; DKMS hook rebuilds with them
+    state: present
+  become: true
+  tags: [drivers, wifi]
+
+- name: Check whether the driver source is already present
+  ansible.builtin.stat:
+    path: "{{ wifi_driver_src }}/dkms.conf"
+  register: wifi_driver_src_present
+  tags: [drivers, wifi]
+
+- name: Clone RTL8821AU driver source at the pinned commit
+  ansible.builtin.git:
+    repo: "{{ wifi_driver_repo }}"
+    dest: "{{ wifi_driver_src }}"
+    version: "{{ wifi_driver_version }}"
+    update: false
+  become: true
+  when: not wifi_driver_src_present.stat.exists
+  tags: [drivers, wifi]
+
+- name: Patch 1/2 — Debian 6.1.190 backport of the usb_driver drvwrap removal
+  ansible.builtin.replace:
+    path: "{{ wifi_driver_src }}/os_dep/linux/usb_intf.c"
+    regexp: '#if \(LINUX_VERSION_CODE >= KERNEL_VERSION\(2, 6, 19\)\) && \(LINUX_VERSION_CODE < KERNEL_VERSION\(6, 8, 0\)\)\n\t\.usbdrv\.drvwrap\.driver\.shutdown'
+    replace: '/* Debian backports the 6.12 drvwrap removal into 6.1.190+. */\n#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 19)) && (LINUX_VERSION_CODE < KERNEL_VERSION(6, 8, 0)) \\\n    && !(LINUX_VERSION_CODE >= KERNEL_VERSION(6, 1, 190) && LINUX_VERSION_CODE < KERNEL_VERSION(6, 2, 0))\n\t.usbdrv.drvwrap.driver.shutdown'
+  become: true
+  tags: [drivers, wifi]
+
+- name: Patch 2/2 — Debian 6.1.190 backport of the tdls_mgmt link_id parameter
+  ansible.builtin.replace:
+    path: "{{ wifi_driver_src }}/os_dep/linux/ioctl_cfg80211.c"
+    regexp: '#if \(LINUX_VERSION_CODE >= KERNEL_VERSION\(6, 5, 0\)\)\n\tint link_id,'
+    replace: '/* Debian backports the 6.5 link_id parameter into 6.1.190+. */\n#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 5, 0)) || \\\n    (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 1, 190) && LINUX_VERSION_CODE < KERNEL_VERSION(6, 2, 0))\n\tint link_id,'
+  become: true
+  tags: [drivers, wifi]
+
+- name: Check DKMS registration
+  ansible.builtin.command: dkms status
+  register: wifi_dkms_status
+  changed_when: false
+  become: true
+  tags: [drivers, wifi]
+
+- name: Register the driver source with DKMS
+  ansible.builtin.command: "dkms add {{ wifi_driver_src }}"
+  when: wifi_driver_dkms_name not in wifi_dkms_status.stdout
+  become: true
+  tags: [drivers, wifi]
+
+- name: Build and install the driver for every installed kernel
+  ansible.builtin.command: dkms autoinstall
+  register: wifi_dkms_autoinstall
+  changed_when: "'autoinstall for kernel' in (wifi_dkms_autoinstall.stdout | default('') ~ wifi_dkms_autoinstall.stderr | default(''))"
+  become: true
+  tags: [drivers, wifi]
+
+- name: Verify the driver is installed for the running kernel
+  ansible.builtin.command: "modinfo {{ wifi_driver_module }}"
+  register: wifi_modinfo
+  changed_when: false
+  failed_when: wifi_modinfo.rc != 0
+  become: true
+  tags: [drivers, wifi]
+
+- name: Load the Wi-Fi driver module
+  community.general.modprobe:
+    name: "{{ wifi_driver_module }}"
+    state: present
+  become: true
+  failed_when: false
+  tags: [drivers, wifi]

@@ -1,0 +1,53 @@
+---
+# CasaOS installation via the official installer script.
+#
+# The script is non-interactive and handles, in one go:
+#   - its own apt repository and CasaOS packages (casaos, casaos-gateway,
+#     casaos-app-management, casaos-local-storage, casaos-user-service)
+#   - runtime dependencies (mergerfs, smartmontools, parted, ntfs-3g, udevil,
+#     samba, cifs-utils, net-tools)
+#   - Docker if it is missing (the geerlingguy.docker role later reconciles the
+#     package/repo to docker-ce; CasaOS only needs a working Docker >= 20)
+#   - the casaos systemd service and the /DATA mergerfs layout
+#
+# Guarded on /usr/bin/casaos: an existing installation is left untouched.
+# Upgrades are handled by the CasaOS UI (or casaos-uninstall + this role again).
+
+- name: Check whether CasaOS is installed
+  ansible.builtin.stat:
+    path: /usr/bin/casaos
+  register: casaos_installed
+  tags: [casaos, casaos-install]
+
+- name: Download the CasaOS installer
+  ansible.builtin.get_url:
+    url: "{{ casaos_install_url }}"
+    dest: "{{ casaos_installer }}"
+    mode: "0755"
+  when: not casaos_installed.stat.exists
+  tags: [casaos, casaos-install]
+
+- name: Run the CasaOS installer
+  ansible.builtin.command:
+    argv:
+      - bash
+      - "{{ casaos_installer }}"
+  become: true
+  when: not casaos_installed.stat.exists
+  changed_when: true
+  tags: [casaos, casaos-install]
+
+- name: Ensure the CasaOS service is enabled and running
+  ansible.builtin.systemd:
+    name: casaos
+    enabled: true
+    state: started
+  become: true
+  tags: [casaos, casaos-install]
+
+- name: Verify the CasaOS service is active
+  ansible.builtin.command: systemctl is-active casaos
+  register: casaos_service_state
+  changed_when: false
+  failed_when: casaos_service_state.stdout | trim != "active"
+  tags: [casaos, casaos-install]

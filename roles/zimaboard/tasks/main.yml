@@ -1,3 +1,11 @@
 #SPDX-License-Identifier: MIT-0
 ---
 # tasks file for zimaboard
+
+- name: Include CasaOS installation (official installer script)
+  ansible.builtin.import_tasks: "casaos.yml"
+  tags: [casaos, casaos-install]
+
+- name: Include RTL8821AU Wi-Fi dongle driver (DKMS)
+  ansible.builtin.import_tasks: "wifi_driver.yml"
+  tags: [wifi, drivers]

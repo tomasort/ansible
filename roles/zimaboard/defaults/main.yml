@@ -1,3 +1,15 @@
-#SPDX-License-Identifier: MIT-0
 ---
-# defaults file for zimaboard
+# RTL8821AU USB Wi-Fi dongle (TP-Link Archer T2U PLUS family) — morrownr driver.
+# The kernel module is named `8821au` (the DKMS package is `rtl8821au`).
+# Pinned to a known-good upstream commit: two compatibility patches are applied
+# in tasks/wifi_driver.yml because Debian backports newer kernel APIs into 6.1.190+.
+wifi_driver_repo: "https://github.com/morrownr/8821au-20210708.git"
+wifi_driver_version: "623d08cb49ba4da003dc9a8204b5cac653cdce70"
+wifi_driver_src: "/usr/src/rtl8821au-5.12.5.2"
+wifi_driver_dkms_name: "rtl8821au"
+wifi_driver_module: "8821au"
+
+# CasaOS — official installer (non-interactive). Guarded on the casaos binary so
+# an existing installation is never re-run; upgrades are done from the CasaOS UI.
+casaos_install_url: "https://get.casaos.io"
+casaos_installer: "/tmp/casaos-install.sh"
