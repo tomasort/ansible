@@ -1,0 +1,8 @@
+---
+# Key remapping (caps->ctrl etc.). The config lives in the dotfiles repo and
+# is stowed by the common role; this only installs the app.
+# Note: first launch still needs the manual driver/input-monitoring approval.
+- name: Ensure Karabiner-Elements is installed
+  community.general.homebrew_cask:
+    name: karabiner-elements
+    state: present

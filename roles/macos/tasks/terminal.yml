@@ -28,52 +28,5 @@
 # silence the bell I think you would need to seaarch for "Silence Bell"
 
 # Install colorls
-# brew install ruby 
+# brew install ruby
 # sudo gem install colorls
-
-# DOCK
-
-# Auto Hide dock
-# defaults write com.apple.dock "autohide" -bool "true" && killall Dock
-# check the value
-# defaults read com.apple.dock "autohide"
-
-# Set the sice of the icons in the dock
-# defaults write com.apple.dock "tilesize" -int "44" && killall Dock
-# Check the value
-# defaults read com.apple.dock "tilesize"
-
-# Set the time to hide
-# defaults write com.apple.dock "autohide-time-modifier" -float "0" && killall Dock
-# Check the value
-# defaults read com.apple.dock "autohide-time-modifier" 
-
-# Disable show-recents
-# defaults write com.apple.dock "show-recents" -bool "false" && killall Dock
-# Check the value
-# defaults read com.apple.dock "show-recents"
-
-# Also set the following: 
-# largesize = 47;
-# launchanim = 0;
-# magnification = 1;
-# orientation = bottom;
-# launchanim = 0;
-
-# SCREEN SHOTS
-
-# Disable the shadow on the bottom of screenshots
-# defaults write com.apple.screencapture "disable-shadow" -bool "true"
-
-# Set the screenshot directory
-# defaults write com.apple.screencapture "location" -string "~/Desktop" && killall SystemUIServer
-
-# Set the format of screenshots
-# defaults write com.apple.screencapture "type" -string "jpg"
-
-# FINDER
-
-# Set show extensions to true
-# defaults write NSGlobalDomain "AppleShowAllExtensions" -bool "true" && killall Finder
-
- 

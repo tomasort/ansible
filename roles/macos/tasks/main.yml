@@ -3,9 +3,26 @@
 #
 # Install reattach-to-user-namespace using brew
 
+- name: Import settings tasks
+  ansible.builtin.import_tasks: "settings.yml"
+
+# homebrew.yml runs after the geerlingguy.mac.homebrew role in macos.yml,
+# which is what installs brew itself on a fresh machine.
+- name: Import homebrew tasks
+  ansible.builtin.import_tasks: "homebrew.yml"
+
+- name: Import aerospace tasks
+  ansible.builtin.import_tasks: "aerospace.yml"
+
+- name: Import terminal tasks
+  ansible.builtin.import_tasks: "terminal.yml"
+
+- name: Import karabiner tasks
+  ansible.builtin.import_tasks: "karabiner.yml"
+
 # TODO: add macos to the zsh plugins
 
-# TODO: add aerospace comfiguration
+# TODO: add aerospace configuration (install is done, still need the toml config)
 # TODO: add JankyBorders comfiguration
 
 # TODO: add the following line to the Info.plist file of XQuartz to avoid the icon in the dock (remember to not add any spaces)

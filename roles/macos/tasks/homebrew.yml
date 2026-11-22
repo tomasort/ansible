@@ -1,0 +1,101 @@
+---
+# Homebrew packages and casks, split by tag: --tags homebrew (base),
+# --tags personal. Homebrew itself is installed by the geerlingguy.mac.homebrew
+# role in macos.yml, which runs before this role.
+
+- name: Install base Homebrew packages
+  community.general.homebrew:
+    name:
+      - ssh-copy-id
+      - ipython
+      - jupyterlab
+      - geckodriver
+      - tree
+      - coreutils
+      - midnight-commander
+      - readline
+      - watch
+      - hub
+      - sdl
+      - jenv
+      - trash
+      - postgis
+      - postgresql
+      - mackup
+    state: present
+  tags: [homebrew]
+
+- name: Install base Homebrew casks
+  community.general.homebrew_cask:
+    name:
+      - chromedriver
+      - wireshark
+      - putty
+      - virtualbox
+      - xquartz
+      - docker
+      - google-chrome
+      - visual-studio-code
+      - balenaetcher
+      - vlc
+      - lulu
+      - rapidminer-studio
+      - postman
+      - private-internet-access
+      - slack
+      - weka
+      - timer
+      - countdown
+      - alfred
+      - appgrid
+      - audio-hijack
+      - bonjeff
+      - copyclip
+      - copyq
+      - mactex
+      - basictex
+      - stats # menu bar system monitor
+    state: present
+  tags: [homebrew]
+
+- name: Install personal Homebrew packages
+  community.general.homebrew:
+    name:
+      - youtube-dl
+      - imagemagick
+      - graphicsmagick
+      - tor
+      - ripgrep
+      - bower
+      - irssi
+      - httrack
+      - unison
+      - pstree
+      - htop-osx
+      - tcptraceroute
+      - libplist
+      - gource
+      - wakeonlan
+      - polipo
+      - m-cli
+    state: present
+  tags: [personal, homebrew]
+
+- name: Install personal Homebrew casks
+  community.general.homebrew_cask:
+    name:
+      - handbrake
+      - iina
+      - whatsapp
+      - notion
+      - obsidian
+      - autodesk-fusion
+      - arduino-ide
+      - qbittorrent
+      - webtorrent
+      - anki
+      - obs
+      - dolphin
+      - diffusionbee # stable diffusion locally
+    state: present
+  tags: [personal, homebrew]

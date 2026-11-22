@@ -1,0 +1,167 @@
+---
+# macOS system settings. Handlers restart the affected app so changes apply
+# immediately; the trackpad setting needs a logout/restart.
+
+- name: Set trackpad speed to max
+  community.general.osx_defaults:
+    domain: NSGlobalDomain
+    key: com.apple.trackpad.scaling
+    type: float
+    value: 3.0
+    state: present
+
+# KEYBOARD (key repeat needs a logout/restart to take effect)
+- name: Speed up key repeat
+  community.general.osx_defaults:
+    domain: NSGlobalDomain
+    key: KeyRepeat
+    type: integer
+    value: 5
+    state: present
+
+- name: Set keyboard focus mode
+  community.general.osx_defaults:
+    domain: NSGlobalDomain
+    key: AppleKeyboardUIMode
+    type: integer
+    value: 2
+    state: present
+
+- name: Disable double-space period substitution
+  community.general.osx_defaults:
+    domain: NSGlobalDomain
+    key: NSAutomaticPeriodSubstitutionEnabled
+    type: boolean
+    value: false
+    state: present
+
+# DOCK
+- name: Auto-hide the Dock
+  community.general.osx_defaults:
+    domain: com.apple.dock
+    key: autohide
+    type: boolean
+    value: true
+    state: present
+  notify: Restart Dock
+
+- name: Set Dock icon size
+  community.general.osx_defaults:
+    domain: com.apple.dock
+    key: tilesize
+    type: integer
+    value: 44
+    state: present
+  notify: Restart Dock
+
+- name: Remove Dock autohide animation delay
+  community.general.osx_defaults:
+    domain: com.apple.dock
+    key: autohide-time-modifier
+    type: float
+    value: 0
+    state: present
+  notify: Restart Dock
+
+- name: Hide recent apps from Dock
+  community.general.osx_defaults:
+    domain: com.apple.dock
+    key: show-recents
+    type: boolean
+    value: false
+    state: present
+  notify: Restart Dock
+
+- name: Set Dock magnification
+  community.general.osx_defaults:
+    domain: com.apple.dock
+    key: magnification
+    type: boolean
+    value: true
+    state: present
+  notify: Restart Dock
+
+- name: Set Dock magnified icon size
+  community.general.osx_defaults:
+    domain: com.apple.dock
+    key: largesize
+    type: integer
+    value: 47
+    state: present
+  notify: Restart Dock
+
+- name: Disable app launch animation
+  community.general.osx_defaults:
+    domain: com.apple.dock
+    key: launchanim
+    type: boolean
+    value: false
+    state: present
+  notify: Restart Dock
+
+- name: Put the Dock at the bottom
+  community.general.osx_defaults:
+    domain: com.apple.dock
+    key: orientation
+    type: string
+    value: bottom
+    state: present
+  notify: Restart Dock
+
+- name: Set hot corners
+  community.general.osx_defaults:
+    domain: com.apple.dock
+    key: "{{ item.key }}"
+    type: integer
+    value: "{{ item.value }}"
+    state: present
+  loop:
+    # 10=Put Display to Sleep, 6=Disable Screen Saver, 2=Mission Control,
+    # 14=Desktop (Cmd-modified); modifier 0 = act without holding a key
+    - { key: wvous-tr-corner, value: 10 }
+    - { key: wvous-tr-modifier, value: 0 }
+    - { key: wvous-tl-corner, value: 6 }
+    - { key: wvous-tl-modifier, value: 0 }
+    - { key: wvous-bl-corner, value: 2 }
+    - { key: wvous-bl-modifier, value: 0 }
+    - { key: wvous-br-corner, value: 14 }
+    - { key: wvous-br-modifier, value: 1048576 }
+  notify: Restart Dock
+
+# SCREENSHOTS
+- name: Disable the shadow on window screenshots
+  community.general.osx_defaults:
+    domain: com.apple.screencapture
+    key: disable-shadow
+    type: boolean
+    value: true
+    state: present
+  notify: Restart SystemUIServer
+
+- name: Set the screenshot save location
+  community.general.osx_defaults:
+    domain: com.apple.screencapture
+    key: location
+    type: string
+    value: "{{ ansible_user_dir }}/Desktop"
+    state: present
+  notify: Restart SystemUIServer
+
+- name: Set the screenshot format to jpg
+  community.general.osx_defaults:
+    domain: com.apple.screencapture
+    key: type
+    type: string
+    value: jpg
+    state: present
+  notify: Restart SystemUIServer
+
+# FINDER
+- name: Show all file extensions
+  community.general.osx_defaults:
+    domain: NSGlobalDomain
+    key: AppleShowAllExtensions
+    type: boolean
+    value: true
+    state: present
+  notify: Restart Finder
