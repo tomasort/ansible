@@ -37,6 +37,19 @@
     src: "/tmp/{{ go_tarball }}"
     dest: "/usr/local"
     remote_src: yes
-  when: go_version_result is failed
-        or go_version not in go_version_result.stdout
+  when:
+    - ansible_os_family != 'Darwin'  # macOS: handled by the BSD tar task below
+    - go_version_result is failed
+      or go_version not in go_version_result.stdout
+  become: true
+
+# ansible.builtin.unarchive demands GNU tar for .tar.gz, which macOS does not
+# ship. bsdtar extracts the Go tarball fine; this is Go's own documented
+# install command for macOS.
+- name: Extract Go tarball (BSD tar, macOS)
+  ansible.builtin.command: "tar -xzf /tmp/{{ go_tarball }} -C /usr/local"
+  when:
+    - ansible_os_family == 'Darwin'
+    - go_version_result is failed
+      or go_version not in go_version_result.stdout
   become: true
