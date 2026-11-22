@@ -44,17 +44,17 @@
       - postman
       - private-internet-access
       - slack
-      - weka
-      - timer
-      - countdown
+      #- weka
+      #- timer
+      #- countdown
       #- alfred
-      - appgrid
+      #- appgrid
       - audio-hijack
       - bonjeff
       - copyclip
-      - copyq
+      #- copyq
       - mactex
-      - basictex
+      #- basictex
       - stats # menu bar system monitor
     state: present
   tags: [homebrew]

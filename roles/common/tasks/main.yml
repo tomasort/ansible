@@ -24,7 +24,7 @@
     - maven
     - rlwrap # for cht.sh
     - git-lfs
-    - neofetch
+    - fastfetch
     - python3
     - lynx
     - zoxide

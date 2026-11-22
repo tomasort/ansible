@@ -13,10 +13,10 @@
     name: font-hack-nerd-font
     state: present
 
-- name: Ensure opencode is installed
-  community.general.homebrew_cask:
-    name: opencode
-    state: present
+#- name: Ensure opencode is installed
+#  community.general.homebrew_cask:
+#    name: opencode
+#    state: present
 
 # Set the font
 # Look for "Normal Font" = "HackNFP-Regular 14";
