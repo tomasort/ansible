@@ -6,6 +6,12 @@
 - name: Import settings tasks
   ansible.builtin.import_tasks: "settings.yml"
 
+# Run the killall Dock/Finder handlers right away instead of at play end:
+# a failure in any later task (mas sign-in, brew, ...) would otherwise skip
+# them entirely, leaving the new settings written but not applied.
+- name: Apply settings changes immediately
+  ansible.builtin.meta: flush_handlers
+
 # homebrew.yml runs after the geerlingguy.mac.homebrew role in macos.yml,
 # which is what installs brew itself on a fresh machine.
 - name: Import homebrew tasks

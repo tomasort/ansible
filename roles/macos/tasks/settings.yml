@@ -7,6 +7,10 @@
     domain: NSGlobalDomain
     key: com.apple.trackpad.scaling
     type: float
+    # Slider keys get rewritten by System Settings with whatever type it
+    # feels like; the module's type guard then errors on the next run.
+    # check_type: false + Python-equality comparison keeps this idempotent.
+    check_type: false
     value: 3.0
     state: present
 
@@ -15,7 +19,8 @@
   community.general.osx_defaults:
     domain: NSGlobalDomain
     key: KeyRepeat
-    type: integer
+    type: float
+    check_type: false
     value: 5
     state: present
 
@@ -50,6 +55,7 @@
     domain: com.apple.dock
     key: tilesize
     type: integer
+    check_type: false
     value: 44
     state: present
   notify: Restart Dock
@@ -58,7 +64,8 @@
   community.general.osx_defaults:
     domain: com.apple.dock
     key: autohide-time-modifier
-    type: float
+    type: integer
+    check_type: false
     value: 0
     state: present
   notify: Restart Dock
@@ -85,7 +92,8 @@
   community.general.osx_defaults:
     domain: com.apple.dock
     key: largesize
-    type: integer
+    type: float
+    check_type: false
     value: 47
     state: present
   notify: Restart Dock

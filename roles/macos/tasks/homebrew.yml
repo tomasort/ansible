@@ -72,7 +72,7 @@
       - httrack
       - unison
       - pstree
-      - htop-osx
+      - htop
       #- tcptraceroute
       #- libplist
       #- gource
