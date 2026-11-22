@@ -28,9 +28,9 @@
 - name: Install base Homebrew casks
   community.general.homebrew_cask:
     name:
-      - chromedriver
+      #- chromedriver
       - wireshark
-      - putty
+      #- putty
       - virtualbox
       - xquartz
       #- docker
