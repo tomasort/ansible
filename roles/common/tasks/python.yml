@@ -6,11 +6,14 @@
   become: "{{ ansible_os_family != 'Darwin' }}"
 
   # Pip installation
+  # On macOS, brew's python3 formula already bundles pip3 — the apt-only
+  # python3-pip package has no brew equivalent.
 - name: Ensure Pip is installed.
   package:
     name: "{{ pip_package }}"
     state: present
   become: "{{ ansible_os_family != 'Darwin' }}"
+  when: ansible_os_family != 'Darwin'
   tags: [ pip ]
 
 - name: Ensure pip packages are installed.
