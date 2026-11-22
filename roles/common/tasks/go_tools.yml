@@ -34,6 +34,22 @@
     recurse: yes
   tags: [go-tools]
 
+- name: Detect a torn cheatsheets clone
+  # Interrupted runs can leave a file named HEAD in the worktree; git then
+  # reads `git reset --hard HEAD` as a path, and the module's pristine
+  # update (force+update) fails forever until the dir is recloned.
+  ansible.builtin.stat:
+    path: "{{ home }}/.config/cheat/cheatsheets/community/HEAD"
+  register: cheat_head_debris
+  tags: [go-tools]
+
+- name: Remove the torn cheatsheets clone
+  ansible.builtin.file:
+    path: "{{ home }}/.config/cheat/cheatsheets/community"
+    state: absent
+  when: cheat_head_debris.stat.exists
+  tags: [go-tools]
+
 - name: Clone/update community cheatsheets (dir stays pristine; personal sheets live elsewhere)
   # force+update: rebuilds torn/crash leftovers and drops anything modified —
   # deliberate, since community sheets are treated as read-only upstream state.
