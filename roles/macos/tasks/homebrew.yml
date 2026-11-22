@@ -3,6 +3,20 @@
 # --tags personal. Homebrew itself is installed by the geerlingguy.mac.homebrew
 # role in macos.yml, which runs before this role.
 
+# Make brew's binaries visible to every new shell: login shells build PATH
+# from /etc/paths + /etc/paths.d/*. The brew install inside the role doesn't
+# do this, so on a fresh machine new terminals can't even find `brew`.
+- name: Put Homebrew on PATH for all login shells
+  ansible.builtin.copy:
+    dest: /etc/paths.d/homebrew
+    content: |
+      /opt/homebrew/bin
+      /opt/homebrew/sbin
+    mode: "0644"
+    owner: root
+  become: true
+  tags: [homebrew]
+
 - name: Install base Homebrew packages
   community.general.homebrew:
     name:
