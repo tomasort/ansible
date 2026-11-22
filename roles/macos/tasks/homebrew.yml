@@ -18,8 +18,8 @@
       - hub
       - sdl
       - jenv
-      - trash
-      - postgis
+      #- trash
+      #- postgis
       - postgresql
       - mackup
     state: present
@@ -33,21 +33,21 @@
       - putty
       - virtualbox
       - xquartz
-      - docker
+      #- docker
       - google-chrome
       - brave-browser
       - visual-studio-code
       - balenaetcher
-      - vlc
+      #- vlc
       - lulu
-      - rapidminer-studio
+      #- rapidminer-studio
       - postman
       - private-internet-access
       - slack
       - weka
       - timer
       - countdown
-      - alfred
+      #- alfred
       - appgrid
       - audio-hijack
       - bonjeff
@@ -62,7 +62,7 @@
 - name: Install personal Homebrew packages
   community.general.homebrew:
     name:
-      - youtube-dl
+      #- youtube-dl
       - imagemagick
       - graphicsmagick
       - tor
@@ -73,12 +73,12 @@
       - unison
       - pstree
       - htop-osx
-      - tcptraceroute
-      - libplist
-      - gource
-      - wakeonlan
-      - polipo
-      - m-cli
+      #- tcptraceroute
+      #- libplist
+      #- gource
+      #- wakeonlan
+      #- polipo
+      #- m-cli
     state: present
   tags: [personal, homebrew]
 
@@ -88,15 +88,15 @@
       - handbrake
       - iina
       - whatsapp
-      - notion
+      #- notion
       - obsidian
-      - autodesk-fusion
-      - arduino-ide
-      - qbittorrent
-      - webtorrent
+      #- autodesk-fusion
+      #- arduino-ide
+      #- qbittorrent
+      #- webtorrent
       - anki
       - obs
-      - dolphin
-      - diffusionbee # stable diffusion locally
+      #- dolphin
+      #- diffusionbee # stable diffusion locally
     state: present
   tags: [personal, homebrew]
