@@ -40,3 +40,20 @@
         ForwardX11 no
     insertbefore: '^Host \*'
   become: true
+
+- name: Ensure github.com is in known_hosts
+  ansible.builtin.shell: >
+    grep -q github.com {{ [home, '.ssh/known_hosts'] | path_join }} 2>/dev/null ||
+    ssh-keyscan -H github.com >> {{ [home, '.ssh/known_hosts'] | path_join }} 2>/dev/null
+  register: github_keyscan
+  changed_when: github_keyscan.stdout | length > 0
+
+# Repos cloned over HTTPS during bootstrap (before this role ran) get their
+# origin switched to SSH now that the key is installed.
+- name: Point the ansible repo origin at SSH
+  ansible.builtin.git_config:
+    name: remote.origin.url
+    repo: "{{ [home, 'ansible'] | path_join }}"
+    scope: local
+    value: "git@github.com:tomasort/ansible"
+  when: lookup('ansible.builtin.fileglob', [home, 'ansible/.git/HEAD'] | path_join) != ''

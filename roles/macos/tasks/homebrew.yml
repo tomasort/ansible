@@ -35,6 +35,7 @@
       - xquartz
       - docker
       - google-chrome
+      - brave-browser
       - visual-studio-code
       - balenaetcher
       - vlc

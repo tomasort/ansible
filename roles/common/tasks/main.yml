@@ -85,6 +85,10 @@
   ansible.builtin.import_tasks: "go_tools.yml"
   tags: [go-tools]
 
+- name: Include ssh tasks
+  ansible.builtin.import_tasks: "ssh.yml"
+  tags: [ssh, minimal]
+
 - name: Stow dotfiles
   ansible.builtin.import_tasks: "dotfiles.yml"
   tags: [dotfiles, minimal]
@@ -128,10 +132,6 @@
 - name: Include python tasks
   ansible.builtin.import_tasks: "python.yml"
   tags: [python]
-
-- name: Include ssh tasks
-  ansible.builtin.import_tasks: "ssh.yml"
-  tags: [ssh, minimal]
 
 - name: Include tmux tasks
   ansible.builtin.import_tasks: "tmux.yml"
