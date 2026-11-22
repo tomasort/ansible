@@ -1,7 +1,21 @@
+# Run with: sudo -v && ansible-playbook macos.yml --ask-become-pass
+# The geerlingguy roles escalate their own tasks (task-level become overrides
+# the play's become: false); --ask-become-pass collects the password once
+# instead of sudo prompting per task, and `sudo -v` pre-caches the timestamp
+# for the pkg-based casks that call sudo internally (virtualbox, mactex, ...).
+# TODO: tag-scope the geerlingguy.mac.homebrew import as `bootstrap` so
+# steady-state runs skip its sudo tasks (chowns etc.) and need no password.
 - hosts: localhost
   tags: macos
   gather_facts: true
   become: false  # Default to no sudo for macos
+
+  # geerlingguy's role installs brew but never puts it on PATH: its tasks
+  # (and ours) inherit the launching shell's PATH, where /opt/homebrew/bin
+  # is missing on a fresh machine. Prepend it for the whole play.
+  # ponytail: Apple Silicon prefix only; add /usr/local if an Intel Mac ever joins.
+  environment:
+    PATH: "/opt/homebrew/bin:/opt/homebrew/sbin:{{ lookup('env', 'PATH') }}"
 
   roles:
     # Installs Homebrew itself if missing. Must run before the macos role,
