@@ -117,7 +117,7 @@
 
 - name: Download tree-sitter CLI (latest stable GitHub release, all platforms)
   ansible.builtin.get_url:
-    url: "https://github.com/tree-sitter/tree-sitter/releases/latest/download/tree-sitter-{{ 'macos' if ansible_system == 'Darwin' else 'linux' }}-{{ 'arm64' if ansible_architecture == 'aarch64' else 'x64' }}.gz"
+    url: "https://github.com/tree-sitter/tree-sitter/releases/latest/download/tree-sitter-{{ 'macos' if ansible_system == 'Darwin' else 'linux' }}-{{ 'arm64' if ansible_architecture in ['aarch64', 'arm64'] else 'x64' }}.gz"
     dest: "{{ [home, '.local/bin/tree-sitter.gz'] | path_join }}"
     mode: "0644"
   when: tree_sitter_check.rc != 0
